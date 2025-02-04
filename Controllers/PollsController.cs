@@ -31,7 +31,9 @@ public class PollsController(IPollService pollService) : ControllerBase
 	[Route("")]
 	public IActionResult Create(Poll poll)
 	{
-		
+		var createdPoll = _pollService.Create(poll);
+		return CreatedAtAction(nameof(GetById), new { id = createdPoll.Id }, createdPoll);
+
 	}
 
 }
