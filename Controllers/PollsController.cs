@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SurveyBasket.Models;
+﻿
 
 namespace SurveyBasket.Controllers;
 [Route("api/[controller]")]// /api/polls
