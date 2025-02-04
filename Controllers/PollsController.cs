@@ -12,13 +12,13 @@ public class PollsController(IPollService pollService) : ControllerBase
 	[Route("getall")]
 	public IActionResult GetAll()
 	{
-		return Ok(_polls);
+		return Ok(_pollService.GetAll());
 	}
 	[HttpGet]
 	[Route("get/{id}")]
 	public IActionResult GetById(int id)
 	{
-		var poll=_polls.SingleOrDefault(p => p.Id == id);
+		var poll=_pollService.GetById(id);
 		return poll is null ? NotFound() : Ok(poll);
 	}
 
