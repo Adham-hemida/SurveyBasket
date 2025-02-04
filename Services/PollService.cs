@@ -7,6 +7,13 @@ public class PollService : IPollService
 		new Poll{Id=2,Title="Second Poll",Description="This is the second poll"},
 	};
 
+	public Poll Create(Poll poll)
+	{
+		poll.Id =_polls.Count + 1;
+		_polls.Add(poll);
+		return poll;
+	}
+
 	public IEnumerable<Poll> GetAll()=> _polls;
 
 

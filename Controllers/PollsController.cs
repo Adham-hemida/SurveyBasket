@@ -22,4 +22,16 @@ public class PollsController(IPollService pollService) : ControllerBase
 		return poll is null ? NotFound() : Ok(poll);
 	}
 
+	public IPollService Get_pollService()
+	{
+		return _pollService;
+	}
+
+	[HttpPost]
+	[Route("")]
+	public IActionResult Create(Poll poll)
+	{
+		
+	}
+
 }
