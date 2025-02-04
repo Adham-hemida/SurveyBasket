@@ -1,9 +1,17 @@
-﻿namespace SurveyBasket.Controllers;
+﻿using SurveyBasket.Services;
+
+namespace SurveyBasket.Controllers;
 
 [Route("api/[controller]")]// /api/Polls
 [ApiController]
 public class PollsController : ControllerBase
 {
+	private readonly IPollService _pollService;
+	public PollsController(IPollService pollService)
+	{
+		_pollService = pollService;
+
+	}
 	[HttpGet]
 	[Route("getall")]
 	public IActionResult GetAll()
