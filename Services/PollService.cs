@@ -7,13 +7,9 @@ public class PollService : IPollService
 		new Poll{Id=2,Title="Second Poll",Description="This is the second poll"},
 	};
 
-	public IEnumerable<Poll> GetAll()
-	{
-		return _polls;
-	}
+	public IEnumerable<Poll> GetAll()=> _polls;
 
-	public Poll? GetById(int id)
-	{
-		return _polls.SingleOrDefault(p => p.Id == id);
-	}
+
+	public Poll? GetById(int id) => _polls.SingleOrDefault(p => p.Id == id);
+
 }

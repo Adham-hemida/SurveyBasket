@@ -6,13 +6,13 @@ public class PollsController : ControllerBase
 {
 	[HttpGet]
 	[Route("getall")]
-	public IActionResult Get()
+	public IActionResult GetAll()
 	{
 		return Ok(_polls);
 	}
 	[HttpGet]
 	[Route("get/{id}")]
-	public IActionResult Get(int id)
+	public IActionResult GetById(int id)
 	{
 		var poll=_polls.SingleOrDefault(p => p.Id == id);
 		return poll is null ? NotFound() : Ok(poll);
