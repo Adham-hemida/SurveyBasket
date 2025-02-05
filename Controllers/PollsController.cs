@@ -12,6 +12,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 	{
 		return Ok(_pollService.GetAll());
 	}
+
 	[HttpGet("get/{id}")]
 	//[Route("get/{id}")]
 	public IActionResult GetById(int id)
@@ -20,13 +21,23 @@ public class PollsController(IPollService pollService) : ControllerBase
 		return poll is null ? NotFound() : Ok(poll);
 	}
 
-
 	[HttpPost("Create")]
 	//[Route("Create")]
 	public IActionResult Create(Poll poll)
 	{
 		var createdPoll = _pollService.Create(poll);
 		return CreatedAtAction(nameof(GetById), new { id = createdPoll.Id }, createdPoll);
+	}
+
+	[HttpPut("Update/{id}")]
+	//[Route("Update")]
+	public IActionResult Update(int id,Poll poll)
+	{
+		var updated = _pollService.Update(id, poll);
+		if(!updated)
+			return NotFound();
+		else
+			return NoContent();
 
 	}
 
