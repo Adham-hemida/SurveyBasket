@@ -32,4 +32,13 @@ public class PollService : IPollService
 
 
 	}
+
+	public bool Delete(int id)
+	{
+		var poll = GetById(id);
+		if (poll is null)
+			return false;
+		_polls.Remove(poll);
+		return true;
+	}
 }

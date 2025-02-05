@@ -1,4 +1,5 @@
-﻿namespace SurveyBasket.Services;
+﻿
+namespace SurveyBasket.Services;
 
 public interface IPollService
 {
@@ -6,4 +7,5 @@ public interface IPollService
 	Poll? GetById(int id);
 	Poll Create(Poll poll);
 	bool Update(int id, Poll poll);
+	bool Delete(int id);
 }
