@@ -12,7 +12,8 @@ public class PollsController(IPollService pollService) : ControllerBase
 	//[Route("getall")]
 	public IActionResult GetAll()
 	{
-		return Ok(_pollService.GetAll());
+		var polls = _pollService.GetAll();
+		return Ok(polls);
 	}
 
 	[HttpGet("get/{id}")]
@@ -20,14 +21,19 @@ public class PollsController(IPollService pollService) : ControllerBase
 	public IActionResult GetById([FromRoute] int id)
 	{
 		var poll=_pollService.GetById(id);
-		return poll is null ? NotFound() : Ok(poll);
+		if (poll is null)
+			return NotFound();
+	
+			var response =(PollResponse)poll;
+		return Ok(response);
+
 	}
 
 	[HttpPost("Create")]
 	//[Route("Create")]
 	public IActionResult Create([FromBody] CreatePollRequest request)
 	{
-		var createdPoll = _pollService.Create(request);
+		var createdPoll = _pollService.Create((Poll)request);
 		return CreatedAtAction(nameof(GetById), new { id = createdPoll.Id }, createdPoll);
 	}
 
@@ -35,7 +41,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 	//[Route("Update")]
 	public IActionResult Update([FromRoute] int id,[FromBody]CreatePollRequest request)
 	{
-		var updated = _pollService.Update(id, request);
+		var updated = _pollService.Update(id,((Poll)request));
 		if(!updated)
 			return NotFound();
 		else
