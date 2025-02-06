@@ -6,7 +6,7 @@ public class CreatePollRequest
 	public string Description { get; set; } = string.Empty;
 
 					
-    public static implicit operator Poll(CreatePollRequest request)
+    public static explicit operator Poll(CreatePollRequest request)
 	{
 		return new()
 		{
