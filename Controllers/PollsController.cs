@@ -1,4 +1,6 @@
-﻿namespace SurveyBasket.Controllers;
+﻿using SurveyBasket.Contracts.Requests;
+
+namespace SurveyBasket.Controllers;
 
 [Route("api/[controller]")]// /api/Polls
 [ApiController]
@@ -18,14 +20,14 @@ public class PollsController(IPollService pollService) : ControllerBase
 	public IActionResult GetById([FromRoute] int id)
 	{
 		var poll=_pollService.GetById(id);
-		return poll is null ? NotFound() : Ok(poll.MapToResponse());
+		return poll is null ? NotFound() : Ok(poll);
 	}
 
 	[HttpPost("Create")]
 	//[Route("Create")]
 	public IActionResult Create([FromBody] CreatePollRequest request)
 	{
-		var createdPoll = _pollService.Create(request.mapToPoll());
+		var createdPoll = _pollService.Create(request);
 		return CreatedAtAction(nameof(GetById), new { id = createdPoll.Id }, createdPoll);
 	}
 
@@ -33,7 +35,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 	//[Route("Update")]
 	public IActionResult Update([FromRoute] int id,[FromBody]CreatePollRequest request)
 	{
-		var updated = _pollService.Update(id, request.mapToPoll());
+		var updated = _pollService.Update(id, request);
 		if(!updated)
 			return NotFound();
 		else
