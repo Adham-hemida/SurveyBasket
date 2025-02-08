@@ -1,4 +1,4 @@
-﻿using SurveyBasket.Contracts.Requests;
+﻿using MapsterMapper;
 
 namespace SurveyBasket.Controllers;
 
@@ -23,8 +23,8 @@ public class PollsController(IPollService pollService) : ControllerBase
 		var poll=_pollService.GetById(id);
 		if (poll is null)
 			return NotFound();
-	
-			var response =(PollResponse)poll;
+
+		var response =poll.Adapt<PollResponse>();
 		return Ok(response);
 
 	}
@@ -33,19 +33,22 @@ public class PollsController(IPollService pollService) : ControllerBase
 	//[Route("Create")]
 	public IActionResult Create([FromBody] CreatePollRequest request)
 	{
-		var createdPoll = _pollService.Create((Poll)request);
-		return CreatedAtAction(nameof(GetById), new { id = createdPoll.Id }, createdPoll);
+		var createdpoll= _pollService.Create(request.Adapt<Poll>());
+		//	var createdPoll = _pollService.Create((Poll)request);
+		//return CreatedAtAction(nameof(GetById), new { id = createdPoll.Id }, createdPoll);
+		return CreatedAtAction(nameof(GetById), new { id = createdpoll.Id },createdpoll);	
+
 	}
 
 	[HttpPut("Update/{id}")]
 	//[Route("Update")]
 	public IActionResult Update([FromRoute] int id,[FromBody]CreatePollRequest request)
 	{
-		var updated = _pollService.Update(id,((Poll)request));
-		if(!updated)
-			return NotFound();
-		else
-			return NoContent();
+	//	var updated = _pollService.Update(id,((Poll)request));
+	//	if(!updated)
+	//		return NotFound();
+	//	else
+		return NoContent();
 
 	}
 	[HttpDelete("Delete/{id}")]
