@@ -21,7 +21,7 @@ public static class DependencyInjection
 	}
 	public static IServiceCollection AddMapsterConfig(this IServiceCollection services)
 	{
-		
+
 		//Add Mapster
 		var mappingConfig = TypeAdapterConfig.GlobalSettings;
 		mappingConfig.Scan(Assembly.GetExecutingAssembly());
