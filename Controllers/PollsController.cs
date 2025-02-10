@@ -1,4 +1,5 @@
-﻿using SurveyBasket.Contracts.Requests;
+﻿using MapsterMapper;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace SurveyBasket.Controllers;
 
@@ -13,7 +14,8 @@ public class PollsController(IPollService pollService) : ControllerBase
 	public IActionResult GetAll()
 	{
 		var polls = _pollService.GetAll();
-		return Ok(polls);
+		var response = polls.Adapt<IEnumerable<PollResponse>>();
+		return Ok(response);
 	}
 
 	[HttpGet("get/{id}")]
@@ -23,8 +25,8 @@ public class PollsController(IPollService pollService) : ControllerBase
 		var poll=_pollService.GetById(id);
 		if (poll is null)
 			return NotFound();
-	
-			var response =(PollResponse)poll;
+
+		var response =poll.Adapt<PollResponse>();
 		return Ok(response);
 
 	}
@@ -33,16 +35,24 @@ public class PollsController(IPollService pollService) : ControllerBase
 	//[Route("Create")]
 	public IActionResult Create([FromBody] CreatePollRequest request)
 	{
-		var createdPoll = _pollService.Create((Poll)request);
-		return CreatedAtAction(nameof(GetById), new { id = createdPoll.Id }, createdPoll);
+		//var validatorResult=validator.Validate(request);
+		//if (!validatorResult.IsValid)
+		//{
+		//	var modelState = new ModelStateDictionary();
+		//     validatorResult.Errors.ForEach(x => modelState.AddModelError(x.PropertyName, x.ErrorMessage));
+		//	return ValidationProblem();
+		//}
+		var createdpoll= _pollService.Create(request.Adapt<Poll>());
+		return CreatedAtAction(nameof(GetById), new { id = createdpoll.Id },createdpoll);	
+
 	}
 
 	[HttpPut("Update/{id}")]
 	//[Route("Update")]
 	public IActionResult Update([FromRoute] int id,[FromBody]CreatePollRequest request)
 	{
-		var updated = _pollService.Update(id,((Poll)request));
-		if(!updated)
+		var updated = _pollService.Update(id, request.Adapt<Poll>());
+		if (!updated)
 			return NotFound();
 		else
 			return NoContent();
