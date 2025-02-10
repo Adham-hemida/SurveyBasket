@@ -33,15 +33,15 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 	[HttpPost("Create")]
 	//[Route("Create")]
-	public IActionResult Create([FromBody] CreatePollRequest request, [FromServices]IValidator<CreatePollRequest> validator)
+	public IActionResult Create([FromBody] CreatePollRequest request)
 	{
-		var validatorResult=validator.Validate(request);
-		if (!validatorResult.IsValid)
-		{
-			var modelState = new ModelStateDictionary();
-		     validatorResult.Errors.ForEach(x => modelState.AddModelError(x.PropertyName, x.ErrorMessage));
-			return ValidationProblem();
-		}
+		//var validatorResult=validator.Validate(request);
+		//if (!validatorResult.IsValid)
+		//{
+		//	var modelState = new ModelStateDictionary();
+		//     validatorResult.Errors.ForEach(x => modelState.AddModelError(x.PropertyName, x.ErrorMessage));
+		//	return ValidationProblem();
+		//}
 		var createdpoll= _pollService.Create(request.Adapt<Poll>());
 		return CreatedAtAction(nameof(GetById), new { id = createdpoll.Id },createdpoll);	
 
