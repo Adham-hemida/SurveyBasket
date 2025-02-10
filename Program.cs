@@ -12,7 +12,7 @@ builder.Services.AddControllers();
 var mappingConfig = TypeAdapterConfig.GlobalSettings;
 mappingConfig.Scan(Assembly.GetExecutingAssembly());
 builder.Services.AddSingleton<IMapper>(new Mapper(mappingConfig));
-
+builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IPollService, PollService>();
 builder.Services.AddOpenApi();
 var app = builder.Build();
