@@ -3,8 +3,8 @@
 public class PollService : IPollService
 {
 	private static List<Poll> _polls = new List<Poll> {
-		new Poll{Id=1,Title="First Poll",Description="This is the first poll"},
-		new Poll{Id=2,Title="Second Poll",Description="This is the second poll"},
+		new Poll{Id=1,Title="First Poll",Summary="This is the first poll"},
+		new Poll{Id=2,Title="Second Poll",Summary="This is the second poll"},
 	};
 
 	
@@ -28,7 +28,7 @@ public class PollService : IPollService
 			return false;
 
 		currentPoll.Title = poll.Title;
-		currentPoll.Description = poll.Description;
+		currentPoll.Summary = poll.Summary;
 		return true;
 
 
