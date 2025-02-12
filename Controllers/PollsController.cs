@@ -1,4 +1,5 @@
-﻿using MapsterMapper;
+﻿using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace SurveyBasket.Controllers;
@@ -11,18 +12,18 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 	[HttpGet("getall")]
 	//[Route("getall")]
-	public async Task<IActionResult> GetAll()
+	public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
 	{
-		var polls = await _pollService.GetAllAsync();
+		var polls = await _pollService.GetAllAsync(cancellationToken);
 		var response = polls.Adapt<IEnumerable<PollResponse>>();
 		return Ok(response);
 	}
 
 	[HttpGet("get/{id}")]
 	//[Route("get/{id}")]
-	public async Task<IActionResult> GetById([FromRoute] int id)
+	public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken cancellationToken = default)
 	{
-		var poll = await _pollService.GetAsync(id);
+		var poll = await _pollService.GetAsync(id,cancellationToken);
 		if (poll is null)
 			return NotFound();
 
@@ -33,16 +34,9 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 	[HttpPost("Create")]
 	//[Route("Create")]
-	public async Task<IActionResult> Create([FromBody] CreatePollRequest request)
+	public async Task<IActionResult> Create([FromBody] CreatePollRequest request,CancellationToken cancellationToken)
 	{
-		//var validatorResult=validator.Validate(request);
-		//if (!validatorResult.IsValid)
-		//{
-		//	var modelState = new ModelStateDictionary();
-		//     validatorResult.Errors.ForEach(x => modelState.AddModelError(x.PropertyName, x.ErrorMessage));
-		//	return ValidationProblem();
-		//}
-		var createdpoll = await _pollService.AddAsync(request.Adapt<Poll>());
+		var createdpoll = await _pollService.AddAsync(request.Adapt<Poll>(), cancellationToken);
 		return CreatedAtAction(nameof(GetById), new { id = createdpoll.Id }, createdpoll);
 
 	}
