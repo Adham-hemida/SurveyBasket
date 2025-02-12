@@ -15,7 +15,7 @@ public class CreatePollRequestValidator : AbstractValidator<CreatePollRequest>
 		 RuleFor(x => x.Summary)
 			.NotEmpty()
 			.WithMessage("{PropertyName} is required")
-			.Length(3, 500);
+			.Length(3, 1500);
 
 		 
 	}
