@@ -1,8 +1,4 @@
-﻿using Mapster;
-using MapsterMapper;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-
-namespace SurveyBasket.Controllers;
+﻿namespace SurveyBasket.Controllers;
 
 [Route("api/[controller]")]// /api/Polls
 [ApiController]
@@ -34,33 +30,44 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 	[HttpPost("Create")]
 	//[Route("Create")]
-	public async Task<IActionResult> Create([FromBody] CreatePollRequest request,CancellationToken cancellationToken)
+	public async Task<IActionResult> Create([FromBody] PollRequest request,CancellationToken cancellationToken)
 	{
 		var createdpoll = await _pollService.AddAsync(request.Adapt<Poll>(), cancellationToken);
 		return CreatedAtAction(nameof(GetById), new { id = createdpoll.Id }, createdpoll);
 
 	}
 
-	//[HttpPut("Update/{id}")]
-	////[Route("Update")]
-	//public IActionResult Update([FromRoute] int id,[FromBody]CreatePollRequest request)
-	//{
-	//	var updated = _pollService.Update(id, request.Adapt<Poll>());
-	//	if (!updated)
-	//		return NotFound();
-	//	else
-	//		return NoContent();
+	[HttpPut("Update/{id}")]
+	//[Route("Update")]
+	public async Task<IActionResult> Update([FromRoute] int id, [FromBody] PollRequest request, CancellationToken cancellationToken)
+	{
+		var updated =await _pollService.UpdateAsync(id, request.Adapt<Poll>(), cancellationToken);
+		if (!updated)
+			return NotFound();
+		else
+			return NoContent();
 
-	//}
-	//[HttpDelete("Delete/{id}")]
-	////[Route("Delete")]
-	//public IActionResult Delete([FromRoute] int id)
-	//{
-	//	var isDeleted= _pollService.Delete(id);
-	//	if (!isDeleted)
-	//		return NotFound();
-	//	else
-	//		return NoContent();
-	//}
+	}
+	[HttpDelete("Delete/{id}")]
+	//[Route("Delete")]
+	public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken cancellationToken)
+	{
+		var isDeleted = await _pollService.DeleteAsync(id, cancellationToken);
+		if (!isDeleted)
+			return NotFound();
+		else
+			return NoContent();
+	}
+	[HttpPut("{id}/togglePublish")]
+	
+	public async Task<IActionResult> TogglePublish([FromRoute] int id,  CancellationToken cancellationToken)
+	{
+		var updated = await _pollService.TogglePublishStatusAsync(id, cancellationToken);
+		if (!updated)
+			return NotFound();
+		else
+			return NoContent();
+
+	}
 
 }
