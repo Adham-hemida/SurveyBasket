@@ -6,9 +6,9 @@ global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 global using SurveyBasket.Entities;
 global using SurveyBasket.Services;
-global using SurveyBasket.Contracts.Responses;
-global using SurveyBasket.Contracts.Requests;
 global using System.Reflection;
 global using SurveyBasket.Persistence;
+global using SurveyBasket.Contracts.Polls;
+global using SurveyBasket.Contracts.Authentication;
 
 
