@@ -6,8 +6,10 @@ using System.Text;
 
 namespace SurveyBasket.Authentication;
 
-public class JwtProvider : IJwtProvider
+public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
+	private readonly JwtOptions _options = options.Value;
+
 	public (string token, int expiresIn) GenerateJwtToken(ApplicationUser user)
 	{
 		Claim[] claims= [
@@ -18,17 +20,17 @@ public class JwtProvider : IJwtProvider
 			new(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
 		];
 
-		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("dwUouBJQ4dQFaYfHFU6oFyMiOgQxBR6P"));
+		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
 
 		var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-		var expiresIn = 30;
+		
 		var token = new JwtSecurityToken(
-			issuer: "SurveyBasket",
-			audience: "SurveyBasket users",
+			issuer:_options.Issuer,
+			audience: _options.Audience,
 			claims: claims,
-			expires: DateTime.UtcNow.AddMinutes(expiresIn),
+			expires: DateTime.UtcNow.AddMinutes(_options.ExpiresInMinutes),
 			signingCredentials: signingCredentials
 			);
-		return (new JwtSecurityTokenHandler().WriteToken(token), expiresIn*60);
+		return (new JwtSecurityTokenHandler().WriteToken(token), _options.ExpiresInMinutes * 60);
 	}
 }

@@ -5,6 +5,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 {
 	private readonly IAuthService _authService = authService;
 
+
 	[HttpPost("")]
 	public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
 	{
@@ -13,4 +14,5 @@ public class AuthController(IAuthService authService) : ControllerBase
 			return BadRequest("Invalid Email/Password");
 		return Ok(authResult);
 	}
+	
 }
