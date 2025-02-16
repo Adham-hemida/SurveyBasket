@@ -1,10 +1,10 @@
 ﻿namespace SurveyBasket.Controllers;
 [Route("[controller]")]
 [ApiController]
-public class AuthController(IAuthService authService,IConfiguration configuration) : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
 	private readonly IAuthService _authService = authService;
-	private readonly IConfiguration _configuration = configuration;
+
 
 	[HttpPost("")]
 	public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken = default)

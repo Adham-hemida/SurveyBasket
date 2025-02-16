@@ -59,7 +59,12 @@ public static class DependencyInjection
 
 		services.AddSingleton<IJwtProvider, JwtProvider>();
 
-	    services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.sectionName));
+	   // services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.sectionName));
+	   //add it because i Had Validation need to use 
+	   services.AddOptions<JwtOptions>()
+			.Bind(configuration.GetSection(JwtOptions.sectionName))
+			.ValidateDataAnnotations()
+			.ValidateOnStart();
 		var JwtSettings = configuration.GetSection(JwtOptions.sectionName).Get<JwtOptions>();
 
 		services.AddAuthentication(options =>
