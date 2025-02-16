@@ -2,6 +2,7 @@
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Authentication;
 using System.Text;
@@ -18,7 +19,7 @@ public static class DependencyInjection
 			options => options.UseSqlServer(connectionString)
 		  );
 		services.AddControllers();
-		services.AddAuthConfig();
+		services.AddAuthConfig(configuration);
 		services.
 			AddMapsterConfig()
 			.AddFluentValidationConfig();
@@ -50,13 +51,16 @@ public static class DependencyInjection
 
 		return services;
 	}
-	public static IServiceCollection AddAuthConfig(this IServiceCollection services)
+	public static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
 	{
-		services.AddSingleton<IJwtProvider, JwtProvider>();
 		services
 			.AddIdentity<ApplicationUser, IdentityRole>()
 			.AddEntityFrameworkStores<ApplicationDbContext>();
 
+		services.AddSingleton<IJwtProvider, JwtProvider>();
+
+	    services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.sectionName));
+		var JwtSettings = configuration.GetSection(JwtOptions.sectionName).Get<JwtOptions>();
 
 		services.AddAuthentication(options =>
 		{
@@ -73,11 +77,13 @@ public static class DependencyInjection
 					ValidateIssuer = true,
 					ValidateAudience = true,
 					ValidateLifetime = true,
-					ValidIssuer = "SurveyBasket",
-					ValidAudience = "SurveyBasket users",
-					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("dwUouBJQ4dQFaYfHFU6oFyMiOgQxBR6P"))
+					ValidIssuer = JwtSettings?.Issuer,
+					ValidAudience = JwtSettings?.Audience,
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings?.Key!))
 				};
 			});
+	
+
 		return services;
 	}
 }
