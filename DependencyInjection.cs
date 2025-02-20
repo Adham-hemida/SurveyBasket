@@ -65,6 +65,7 @@ public static class DependencyInjection
 			.Bind(configuration.GetSection(JwtOptions.sectionName))
 			.ValidateDataAnnotations()
 			.ValidateOnStart();
+		// to use it to get the name of attributes in JwtOptions class
 		var JwtSettings = configuration.GetSection(JwtOptions.sectionName).Get<JwtOptions>();
 
 		services.AddAuthentication(options =>
@@ -73,6 +74,7 @@ public static class DependencyInjection
 			options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
 		})
+
 			.AddJwtBearer(o =>
 			{
 				o.SaveToken = true;
@@ -87,7 +89,7 @@ public static class DependencyInjection
 					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings?.Key!))
 				};
 			});
-	
+
 
 		return services;
 	}
