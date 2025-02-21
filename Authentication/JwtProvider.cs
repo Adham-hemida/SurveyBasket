@@ -10,7 +10,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
 	private readonly JwtOptions _options = options.Value;
 
-	public (string token, int expiresIn) GenerateJwtToken(ApplicationUser user)
+	public (string token, int expiresIn)GenerateJwtToken(ApplicationUser user)
 	{
 		Claim[] claims= [
 	        new(JwtRegisteredClaimNames.Sub,user.Id),
