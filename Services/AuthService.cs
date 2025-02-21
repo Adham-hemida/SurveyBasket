@@ -73,7 +73,7 @@ public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider j
 		});
 		await _userManager.UpdateAsync(user);
 		return new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn,newRefreshToken, newRefreshTokenExpiration);
-
+			
 	}
 	private static string GenerateRefreshToken()
 	{
