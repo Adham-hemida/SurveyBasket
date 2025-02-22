@@ -36,7 +36,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 	public async Task<IActionResult> Create([FromBody] PollRequest request,CancellationToken cancellationToken)
 	{
 		var createdpoll = await _pollService.AddAsync(request.Adapt<Poll>(), cancellationToken);
-		return CreatedAtAction(nameof(GetById), new { id = createdpoll.Id }, createdpoll);
+		return CreatedAtAction(nameof(GetById), new { id = createdpoll.Id }, createdpoll.Adapt<PollResponse>());
 
 	}
 
