@@ -22,5 +22,13 @@ public class AuthController(IAuthService authService) : ControllerBase
 			return BadRequest("Invalid Token");
 		return Ok(authResult);
 	}
-	
+	[HttpPost("revoke-refresh-token")]
+	public async Task<IActionResult> RevokeRefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
+	{
+		var isRevoked = await _authService.RevokeRefreshTokenAsync(request.token, request.refreshToken, cancellationToken);
+		if(isRevoked)
+		   return Ok();
+		return BadRequest("Operation Failed");
+	}
+
 }
