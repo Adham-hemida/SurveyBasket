@@ -2,7 +2,6 @@
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Authentication;
 using System.Text;
@@ -13,11 +12,20 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
 	{
+		services.AddCors(options =>
+		options.AddPolicy("My Policy", bulider =>
+		{
+			bulider.AllowAnyMethod()
+			.AllowAnyHeader()
+			.WithOrigins("http://localhost:3000");
+		}));
+
 		var connectionString = configuration.GetConnectionString("DefaultConnection") ??
 			throw new InvalidOperationException("connection string 'Default connection not found'");
 		services.AddDbContext<ApplicationDbContext>(
 			options => options.UseSqlServer(connectionString)
 		  );
+
 		services.AddControllers();
 		services.AddAuthConfig(configuration);
 		services.
@@ -31,7 +39,7 @@ public static class DependencyInjection
 
 		return services;
 	}
-	public static IServiceCollection AddMapsterConfig(this IServiceCollection services)
+	private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
 	{
 
 		//Add Mapster
@@ -42,7 +50,7 @@ public static class DependencyInjection
 
 		return services;
 	}
-	public static IServiceCollection AddFluentValidationConfig(this IServiceCollection services)
+	private static IServiceCollection AddFluentValidationConfig(this IServiceCollection services)
 	{
 		services
 			.AddFluentValidationAutoValidation()
@@ -51,7 +59,7 @@ public static class DependencyInjection
 
 		return services;
 	}
-	public static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
+	private static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
 	{
 		services
 			.AddIdentity<ApplicationUser, IdentityRole>()

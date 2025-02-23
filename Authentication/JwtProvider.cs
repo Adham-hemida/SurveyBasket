@@ -21,9 +21,8 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 		];
 		
 		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
-
 		var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-		
+
 		var token = new JwtSecurityToken(
 			issuer: _options.Issuer,
 			audience: _options.Audience,
@@ -51,7 +50,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 			var jwtToken = (JwtSecurityToken)validatedToken;
 			return jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
 		}
-		catch 
+		catch
 		{
 			return null;
 		}

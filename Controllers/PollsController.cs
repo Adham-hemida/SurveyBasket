@@ -9,7 +9,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 {
 	private readonly IPollService _pollService = pollService;
 
-	[HttpGet("getall")]
+	[HttpGet("")]
 	
 	public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
 	{
@@ -18,7 +18,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 		return Ok(response);
 	}
 
-	[HttpGet("get/{id}")]
+	[HttpGet("{id}")]
 	//[Route("get/{id}")]
 	public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken cancellationToken = default)
 	{
@@ -31,7 +31,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 	}
 
-	[HttpPost("Create")]
+	[HttpPost("")]
 	//[Route("Create")]
 	public async Task<IActionResult> Create([FromBody] PollRequest request,CancellationToken cancellationToken)
 	{
@@ -40,7 +40,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 	}
 
-	[HttpPut("Update/{id}")]
+	[HttpPut("{id}")]
 	//[Route("Update")]
 	public async Task<IActionResult> Update([FromRoute] int id, [FromBody] PollRequest request, CancellationToken cancellationToken)
 	{
@@ -51,7 +51,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 			return NoContent();
 
 	}
-	[HttpDelete("Delete/{id}")]
+	[HttpDelete("{id}")]
 	//[Route("Delete")]
 	public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken cancellationToken)
 	{
