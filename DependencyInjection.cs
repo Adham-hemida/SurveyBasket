@@ -12,12 +12,14 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
 	{
+		var allowOrigins=configuration.GetSection("AllowOrigins").Get<string[]>();
+
 		services.AddCors(options =>
-		options.AddPolicy("My Policy", bulider =>
+		options.AddDefaultPolicy(bulider =>
 		{
 			bulider.AllowAnyMethod()
 			.AllowAnyHeader()
-			.WithOrigins("http://localhost:3000");
+			.WithOrigins(allowOrigins!);
 		}));
 
 		var connectionString = configuration.GetConnectionString("DefaultConnection") ??
