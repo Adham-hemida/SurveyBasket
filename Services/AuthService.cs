@@ -34,8 +34,6 @@ public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider j
 		});
 		await _userManager.UpdateAsync(user);
 		return new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName,token,expiresIn,refreshToken,refreshTokenExpiration);
-
-
 	}
 
 
