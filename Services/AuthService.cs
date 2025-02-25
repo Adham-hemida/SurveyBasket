@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SurveyBasket.Authentication;
+using SurveyBasket.Errors;
 using System.Security.Cryptography;
 
 namespace SurveyBasket.Services;
@@ -10,16 +11,16 @@ public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider j
 	private readonly IJwtProvider _jwtProvider = jwtProvider;
 	private readonly int _refreshTokenExpirationDays=14;	
 
-	public async Task<AuthResponse?> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
+	public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
 	{
 		//Check user if exists
 		var user = await _userManager.FindByEmailAsync(email);
 		if(user is null)
-			return null;
+			return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 		//check password if it correct
 		var isValidPassword = await _userManager.CheckPasswordAsync(user, password);
 		if(!isValidPassword)
-			return null;
+			return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 		//generate token
 		var (token, expiresIn) = _jwtProvider.GenerateJwtToken(user);
 		//generate refreshToken
@@ -33,7 +34,8 @@ public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider j
 			ExpiresOn = refreshTokenExpiration
 		});
 		await _userManager.UpdateAsync(user);
-		return new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName,token,expiresIn,refreshToken,refreshTokenExpiration);
+		var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
+		return  Result.Success(response);
 	}
 
 
