@@ -11,14 +11,14 @@ public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider j
 	private readonly IJwtProvider _jwtProvider = jwtProvider;
 	private readonly int _refreshTokenExpirationDays=14;	
 
-	public async Task<Result<AuthResponse>> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
+	public async Task<Result<AuthResponse>> GetTokenAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default)
 	{
 		//Check user if exists
-		var user = await _userManager.FindByEmailAsync(email);
+		var user = await _userManager.FindByEmailAsync(loginRequest.Email);
 		if(user is null)
 			return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 		//check password if it correct
-		var isValidPassword = await _userManager.CheckPasswordAsync(user, password);
+		var isValidPassword = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
 		if(!isValidPassword)
 			return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 		//generate token
@@ -37,23 +37,23 @@ public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider j
 		var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
 		return  Result.Success(response);
 	}
+	
 
-
-	public async Task<AuthResponse?> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+	public async Task<Result<AuthResponse>> GetRefreshTokenAsync(RefreshTokenRequest refreshTokenRequest, CancellationToken cancellationToken = default)
 	{
 		//I need to validate the token and refreshToken
-		var userId = _jwtProvider.ValidateToken(token);
+		var userId = _jwtProvider.ValidateToken(refreshTokenRequest.token);
 		if (userId is null)
-			return null;
+			return Result.Failure<AuthResponse>(UserErrors.InvalidJwtTokens);
 		//if i reach here, the token is valid and userId is not null and i got it
 		//get the user from the database
 		var user = await _userManager.FindByIdAsync(userId);
 		if (user is null)
-			return null;
+			return Result.Failure<AuthResponse>(UserErrors.InvalidJwtTokens);
 		//check if the refreshToken is valid(that mean The refreshToken i send is true) or not and get it from the database and check if it is active or not 
-		var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken && x.IsActive);
+		var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshTokenRequest.refreshToken && x.IsActive);
 		if (userRefreshToken is null)
-			return null;
+			return Result.Failure<AuthResponse>(UserErrors.InvalidJwtTokens);
 		//if i reach here, the refreshToken is valid and i got it from the database 
 		//I revoked it as i need user to use it one time and need to generate new one
 		userRefreshToken.RevokedOn = DateTime.UtcNow;
@@ -72,23 +72,24 @@ public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider j
 			ExpiresOn = newRefreshTokenExpiration
 		});
 		await _userManager.UpdateAsync(user);
-		return new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn,newRefreshToken, newRefreshTokenExpiration);
-			
+			var result=new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn,newRefreshToken, newRefreshTokenExpiration);
+		return Result.Success(result);
+
 	}
-	public async Task<bool> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+	public async Task<Result> RevokeRefreshTokenAsync(RefreshTokenRequest refreshTokenRequest, CancellationToken cancellationToken = default)
 	{
-		var userId = _jwtProvider.ValidateToken(token);
+		var userId = _jwtProvider.ValidateToken(refreshTokenRequest.token);
 		if(userId is null)
-			return false;
+			return Result.Failure(UserErrors.InvalidRefreshToken);
 		var user=await _userManager.FindByIdAsync(userId);
 		if(user is null)
-			return false;	
-		var userRefreshToken=user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken && x.IsActive);	
+			return Result.Failure(UserErrors.InvalidRefreshToken);
+		var userRefreshToken =user.RefreshTokens.SingleOrDefault(x => x.Token == refreshTokenRequest.refreshToken && x.IsActive);	
 		if(userRefreshToken is null)
-			return false;
+			return Result.Failure(UserErrors.InvalidRefreshToken);
 		userRefreshToken.RevokedOn = DateTime.UtcNow;
 		await _userManager.UpdateAsync(user);
-		return true;
+		return Result.Success();
 	}
 	private static string GenerateRefreshToken()
 	{
