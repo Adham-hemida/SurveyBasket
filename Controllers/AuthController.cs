@@ -10,13 +10,10 @@ public class AuthController(IAuthService authService) : ControllerBase
 	public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
 	{
 		var authResult = await _authService.GetTokenAsync(request, cancellationToken);
-		//return authResult.IsSuccess
-		//	? Ok(authResult.Value)
-		//	: Problem(statusCode:StatusCodes.Status400BadRequest,title:authResult.Error.Code,detail:authResult.Error.Description);
-		return authResult.Match(
-			Ok,
-			error => Problem(statusCode: StatusCodes.Status400BadRequest, title: error.Code, detail: error.Description)
-			);
+		return authResult.IsSuccess
+			? Ok(authResult.Value)
+			: Problem(statusCode: StatusCodes.Status400BadRequest, title: authResult.Error.Code, detail: authResult.Error.Description);
+
 	}
 	[HttpPost("Refresh")]
 	public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
