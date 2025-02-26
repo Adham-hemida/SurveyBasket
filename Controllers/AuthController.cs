@@ -12,7 +12,14 @@ public class AuthController(IAuthService authService) : ControllerBase
 		var authResult = await _authService.GetTokenAsync(request, cancellationToken);
 		return authResult.IsSuccess
 			? Ok(authResult.Value)
-			: Problem(statusCode: StatusCodes.Status400BadRequest, title: authResult.Error.Code, detail: authResult.Error.Description);
+			: Problem(
+				statusCode: StatusCodes.Status400BadRequest,
+				title: "Bad Request",
+			extensions: new Dictionary<string, object?>()
+			{
+				{"errors",new[]{ authResult.Error} }
+			}
+				);
 
 	}
 	[HttpPost("Refresh")]
