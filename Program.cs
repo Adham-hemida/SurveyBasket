@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Builder;
 using SurveyBasket;
-using SurveyBasket.Errors;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
