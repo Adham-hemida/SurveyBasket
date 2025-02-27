@@ -1,4 +1,5 @@
-﻿using SurveyBasket.Errors;
+﻿using SurveyBasket.Entities;
+using SurveyBasket.Errors;
 using System.Reflection.Metadata.Ecma335;
 
 namespace SurveyBasket.Services;
@@ -28,6 +29,9 @@ public class PollService(ApplicationDbContext context) : IPollService
 
 	public async Task<Result<PollResponse>> AddAsync(PollRequest request, CancellationToken cancellationToken = default)
 	{
+		var isExisting= await _context.Polls.AnyAsync(p => p.Title == request.Title, cancellationToken);
+		if (isExisting)
+			return Result.Failure<PollResponse>(PollErrors.DuplicatedPollTitle);
 		// first i need to conert it into domain model (Poll) and then save it in the database as database accepting domain model(Poll)
 		var poll = request.Adapt<Poll>();
 
@@ -37,16 +41,20 @@ public class PollService(ApplicationDbContext context) : IPollService
 		return Result.Success( poll.Adapt<PollResponse>());
 	}
 
-	public async Task<Result> UpdateAsync(int id, PollRequest poll, CancellationToken cancellationToken = default)
+	public async Task<Result> UpdateAsync(int id, PollRequest request, CancellationToken cancellationToken = default)
 	{
 		var currentPoll = await _context.Polls.FindAsync(id, cancellationToken);
 		if (currentPoll is null)
 			return Result.Failure(PollErrors.PollNotFound);
 
-		currentPoll.Title = poll.Title;
-		currentPoll.Summary = poll.Summary;
-		currentPoll.StartsAt = poll.StartsAt;
-		currentPoll.EndsAt = poll.EndsAt;
+		var isExisting = await _context.Polls.AnyAsync(p => p.Title == request.Title && p.Id != id, cancellationToken);
+		if (isExisting)
+			return Result.Failure(PollErrors.DuplicatedPollTitle);
+
+		currentPoll.Title = request.Title;
+		currentPoll.Summary = request.Summary;
+		currentPoll.StartsAt = request.StartsAt;
+		currentPoll.EndsAt = request.EndsAt;
 
 		await _context.SaveChangesAsync(cancellationToken);
 

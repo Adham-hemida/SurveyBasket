@@ -8,7 +8,7 @@ public static class ResultExtensions
 			throw new InvalidOperationException("Can not create problem details for successful result");
 
 
-        var problem=Results.Problem(statusCode: StatusCodes.Status400BadRequest);
+        var problem=Results.Problem(statusCode: statusCode);
 
 		var problemDetails= problem.GetType().GetProperty(nameof(ProblemDetails))!.GetValue(problem) as ProblemDetails;
 		problemDetails!.Extensions= new Dictionary<string, object?>()
