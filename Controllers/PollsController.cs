@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using SurveyBasket.Errors;
 
 namespace SurveyBasket.Controllers;
 
@@ -46,10 +47,14 @@ public class PollsController(IPollService pollService) : ControllerBase
 	public async Task<IActionResult> Update([FromRoute] int id, [FromBody] PollRequest request, CancellationToken cancellationToken)
 	{
 		var result = await _pollService.UpdateAsync(id, request, cancellationToken);
+		if (result.IsSuccess)
+			return NoContent();
 
-		return result.IsSuccess
-			? NoContent()
-			: result.ToProblem(statusCode: StatusCodes.Status404NotFound);
+		return result.Error.Equals(PollErrors.DuplicatedPollTitle)
+			? result.ToProblem(statusCode: StatusCodes.Status409Conflict)
+			: result.ToProblem(statusCode: StatusCodes.Status404NotFound
+
+
 
 	}
 	[HttpDelete("{id}")]
