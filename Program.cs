@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Builder;
 using SurveyBasket;
+using SurveyBasket.Errors;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -16,5 +18,5 @@ app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
-
+app.UseExceptionHandler();
 app.Run();

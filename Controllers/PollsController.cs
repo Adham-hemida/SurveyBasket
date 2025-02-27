@@ -32,8 +32,12 @@ public class PollsController(IPollService pollService) : ControllerBase
 	//[Route("")]
 	public async Task<IActionResult> Create([FromBody] PollRequest request, CancellationToken cancellationToken)
 	{
-		var createdpoll = await _pollService.AddAsync(request, cancellationToken);
-		return CreatedAtAction(nameof(GetById), new { id = createdpoll.Id }, createdpoll);
+		var result = await _pollService.AddAsync(request, cancellationToken);
+		
+		return result.IsSuccess
+			? CreatedAtAction(nameof(GetById), new { id = result.Value.Id }, result.Value)
+			: result.ToProblem(statusCode: StatusCodes.Status409Conflict);
+		
 
 	}
 

@@ -26,14 +26,15 @@ public class PollService(ApplicationDbContext context) : IPollService
 
 	}
 
-	public async Task<PollResponse> AddAsync(PollRequest request, CancellationToken cancellationToken = default)
+	public async Task<Result<PollResponse>> AddAsync(PollRequest request, CancellationToken cancellationToken = default)
 	{
 		// first i need to conert it into domain model (Poll) and then save it in the database as database accepting domain model(Poll)
 		var poll = request.Adapt<Poll>();
 
 		await _context.AddAsync(poll, cancellationToken);
 		await _context.SaveChangesAsync(cancellationToken);
-		return poll.Adapt<PollResponse>();
+
+		return Result.Success( poll.Adapt<PollResponse>());
 	}
 
 	public async Task<Result> UpdateAsync(int id, PollRequest poll, CancellationToken cancellationToken = default)
