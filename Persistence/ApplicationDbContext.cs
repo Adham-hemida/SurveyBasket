@@ -11,8 +11,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-		base.OnModelCreating(modelBuilder);
+		var cascadeFks=modelBuilder.Model
+			.GetEntityTypes()
+			.SelectMany(t => t.GetForeignKeys())
+			.Where(fk => fk.DeleteBehavior == DeleteBehavior.Cascade &&  !fk.IsOwnership);
+		foreach (var fk in cascadeFks)
+			fk.DeleteBehavior = DeleteBehavior.Restrict;
+		
+			base.OnModelCreating(modelBuilder);
 	}
+
+
+
+
 	public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
 	{
 		var entries=ChangeTracker.Entries<AuditableEntity>();
