@@ -52,7 +52,7 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 		return result.Error.Equals(PollErrors.DuplicatedPollTitle)
 			? result.ToProblem(statusCode: StatusCodes.Status409Conflict)
-			: result.ToProblem(statusCode: StatusCodes.Status404NotFound
+			: result.ToProblem(statusCode: StatusCodes.Status404NotFound);
 
 
 
