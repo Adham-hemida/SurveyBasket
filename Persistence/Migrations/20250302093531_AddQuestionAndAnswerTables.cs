@@ -16,7 +16,7 @@ namespace SurveyBasket.Persistence.Migrations
                 table: "Polls");
 
             migrationBuilder.CreateTable(
-                name: "Question",
+                name: "Questions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -31,20 +31,20 @@ namespace SurveyBasket.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Question", x => x.Id);
+                    table.PrimaryKey("PK_Questions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Question_AspNetUsers_CreatedById",
+                        name: "FK_Questions_AspNetUsers_CreatedById",
                         column: x => x.CreatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Question_AspNetUsers_UpdatedById",
+                        name: "FK_Questions_AspNetUsers_UpdatedById",
                         column: x => x.UpdatedById,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Question_Polls_PollId",
+                        name: "FK_Questions_Polls_PollId",
                         column: x => x.PollId,
                         principalTable: "Polls",
                         principalColumn: "Id",
@@ -52,7 +52,7 @@ namespace SurveyBasket.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Answer",
+                name: "Answers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -63,35 +63,35 @@ namespace SurveyBasket.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Answer", x => x.Id);
+                    table.PrimaryKey("PK_Answers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Answer_Question_QuestionId",
+                        name: "FK_Answers_Questions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "Question",
+                        principalTable: "Questions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Answer_QuestionId_Content",
-                table: "Answer",
+                name: "IX_Answers_QuestionId_Content",
+                table: "Answers",
                 columns: new[] { "QuestionId", "Content" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Question_CreatedById",
-                table: "Question",
+                name: "IX_Questions_CreatedById",
+                table: "Questions",
                 column: "CreatedById");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Question_PollId_Content",
-                table: "Question",
+                name: "IX_Questions_PollId_Content",
+                table: "Questions",
                 columns: new[] { "PollId", "Content" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Question_UpdatedById",
-                table: "Question",
+                name: "IX_Questions_UpdatedById",
+                table: "Questions",
                 column: "UpdatedById");
 
             migrationBuilder.AddForeignKey(
@@ -111,10 +111,10 @@ namespace SurveyBasket.Persistence.Migrations
                 table: "Polls");
 
             migrationBuilder.DropTable(
-                name: "Answer");
+                name: "Answers");
 
             migrationBuilder.DropTable(
-                name: "Question");
+                name: "Questions");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Polls_AspNetUsers_CreatedById",
