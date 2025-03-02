@@ -1,0 +1,34 @@
+﻿using SurveyBasket.Contracts.Questions;
+using SurveyBasket.Errors;
+
+namespace SurveyBasket.Services;
+
+public class Questionservice(ApplicationDbContext context) : IQuestionServicr
+{
+	private readonly ApplicationDbContext _context = context;
+
+	public async Task<Result<QuestionResponse>> AddAsync(int pollId, QuestionRequest request, CancellationToken cancellationToken)
+	{
+		var pollIsExists = await _context.Polls.AnyAsync(x => x.Id == pollId, cancellationToken);
+
+		if (!pollIsExists)
+			return Result.Failure<QuestionResponse>(PollErrors.PollNotFound);
+
+		var questionIsExists =await _context.Questions.AnyAsync(x => x.Content == request.Content, cancellationToken);
+
+		if (questionIsExists)
+			return Result.Failure<QuestionResponse>(QuestionErrors.DuplicatedQuestionContent);
+
+		var question = request.Adapt<Question>();
+		question.PollId = pollId;
+		
+		request.Answers.ForEach(answer => question.Answers.Add(new Answer { Content = answer }));
+		await _context.AddAsync(question,cancellationToken);
+		await _context.SaveChangesAsync(cancellationToken);
+		
+		return Result.Success(question.Adapt<QuestionResponse>());
+
+
+	}
+
+}
