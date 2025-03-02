@@ -2,7 +2,7 @@
 
 namespace SurveyBasket.Services;
 
-public interface IQuestionServicr
+public interface IQuestionService
 {
 	Task<Result<QuestionResponse>> AddAsync(int pollId,QuestionRequest request,CancellationToken cancellationToken);
 }

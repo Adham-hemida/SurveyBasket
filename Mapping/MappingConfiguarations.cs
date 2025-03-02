@@ -1,4 +1,6 @@
-﻿namespace SurveyBasket.Mapping;
+﻿using SurveyBasket.Contracts.Questions;
+
+namespace SurveyBasket.Mapping;
 
 public class MappingConfiguarations : IRegister
 {
@@ -9,5 +11,9 @@ public class MappingConfiguarations : IRegister
 		//	.Map(dest => dest.Notes, src => src.Description);
 		//config.NewConfig<CreatePollRequest, Poll>() // CreatePollRequest to Poll
 		//	.Map(dest => dest.Description, src => src.Notes);
+
+
+		config.NewConfig<QuestionRequest, Question>()
+			.Map(dest => dest.Answers,src=>src.Answers.Select(answer=>new Answer{Content=answer}));
 	}
 }
