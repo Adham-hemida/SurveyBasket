@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using SurveyBasket.Errors;
+﻿using SurveyBasket.Errors;
 
 namespace SurveyBasket.Controllers;
 
@@ -14,8 +13,10 @@ public class PollsController(IPollService pollService) : ControllerBase
 
 	public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
 	{
-		var polls = await _pollService.GetAllAsync(cancellationToken);
-		return Ok(polls);
+		var result = await _pollService.GetAllAsync(cancellationToken);
+		return result.IsSuccess
+			?Ok(result.Value)
+			:result.ToProblem(statusCode:StatusCodes.Status404NotFound);
 	}
 
 	[HttpGet("{id}")]
