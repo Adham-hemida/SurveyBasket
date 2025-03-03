@@ -1,5 +1,4 @@
 ﻿using SurveyBasket.Errors;
-using System.Collections.Generic;
 
 namespace SurveyBasket.Services;
 
@@ -10,8 +9,11 @@ public class PollService(ApplicationDbContext context) : IPollService
 
 
 	public async Task<Result<IEnumerable<PollResponse>>> GetAllAsync( CancellationToken cancellationToken = default)
-	{  var result= await _context.Polls.AsNoTracking().ToListAsync(cancellationToken);
-		return Result.Success( result.Adapt<IEnumerable<PollResponse>>());
+	{  var result= await _context.Polls
+			.ProjectToType<PollResponse>()
+			.AsNoTracking().ToListAsync(cancellationToken);
+
+		return Result.Success<IEnumerable<PollResponse>>( result);
 	}
 	
 	     
