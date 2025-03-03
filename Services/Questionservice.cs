@@ -1,6 +1,7 @@
 ﻿using SurveyBasket.Contracts.Answers;
 using SurveyBasket.Contracts.Questions;
 using SurveyBasket.Errors;
+using System.Linq;
 
 namespace SurveyBasket.Services;
 
@@ -24,8 +25,24 @@ public class Questionservice(ApplicationDbContext context) : IQuestionService
 			//	)))
 			.ProjectToType<QuestionResponse>()
 			.AsNoTracking()
-			.ToListAsync();
+			.ToListAsync(cancellationToken);
 		return Result.Success<IEnumerable<QuestionResponse>>(questions);
+
+	}
+
+	public async Task<Result<QuestionResponse>> GetAsync(int pollId, int id, CancellationToken cancellationToken = default)
+	{
+		var question=await _context.Questions
+			.Where(x=>x.PollId == pollId && x.Id==id )
+			.Include(x => x.Answers)
+			.ProjectToType<QuestionResponse>()
+			.AsNoTracking()
+			.SingleOrDefaultAsync(cancellationToken);
+
+		if (question is null)
+			return Result.Failure<QuestionResponse>(QuestionErrors.QuestionNotFound);
+
+		return Result.Success(question);
 
 	}
 
@@ -52,5 +69,6 @@ public class Questionservice(ApplicationDbContext context) : IQuestionService
 
 
 	}
+
 
 }

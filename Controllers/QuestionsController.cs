@@ -18,9 +18,13 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
 			:result.ToProblem(statusCode:StatusCodes.Status404NotFound);
 	}
 	[HttpGet("{id}")]
-	public IActionResult Get()
+	public async Task< IActionResult> GetById([FromRoute] int pollId, [FromRoute] int id,CancellationToken cancellationToken)
 	{
-		return Ok();
+		var result =await _questionService.GetAsync(pollId, id, cancellationToken);
+
+		return result.IsSuccess
+			? Ok(result.Value) 
+			: result.ToProblem(statusCode: StatusCodes.Status404NotFound);
 	}
 
 	[HttpPost("")]
@@ -29,7 +33,7 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
 		var result=await _questionService.AddAsync(pollId,questionRequest,cancellationToken);
 
 		if (result.IsSuccess)
-			return CreatedAtAction(nameof(Get),new {pollId,result.Value.Id},result.Value);
+			return CreatedAtAction(nameof(GetById),new {pollId,result.Value.Id},result.Value);
 
 		return result.Error.Equals(QuestionErrors.QuestionNotFound)
 			? result.ToProblem(statusCode: StatusCodes.Status404NotFound)
