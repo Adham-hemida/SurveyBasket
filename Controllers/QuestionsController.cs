@@ -9,6 +9,14 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
 {
 	private readonly IQuestionService _questionService = questionService;
 
+	[HttpGet("")]
+	public async Task<IActionResult> GetAll([FromRoute]int pollId,CancellationToken cancellationToken)
+	{
+		var result = await _questionService.GetAllAsync(pollId, cancellationToken);
+		return result.IsSuccess
+			?Ok(result.Value)
+			:result.ToProblem(statusCode:StatusCodes.Status404NotFound);
+	}
 	[HttpGet("{id}")]
 	public IActionResult Get()
 	{
