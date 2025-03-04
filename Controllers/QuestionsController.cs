@@ -39,6 +39,18 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
 			? result.ToProblem(statusCode: StatusCodes.Status404NotFound)
 			:result.ToProblem(statusCode: StatusCodes.Status409Conflict);
 
+	}[HttpPost("{id}")]
+	public  async Task<IActionResult> Update([FromRoute]int pollId,[FromRoute]int id,[FromBody]QuestionRequest questionRequest,CancellationToken cancellationToken)
+	{
+		var result=await _questionService.UpdateAsync(pollId,id,questionRequest,cancellationToken);
+
+		if (result.IsSuccess)
+			return NoContent();
+
+		return result.Error.Equals(QuestionErrors.QuestionNotFound)
+			? result.ToProblem(statusCode: StatusCodes.Status404NotFound)
+			:result.ToProblem(statusCode: StatusCodes.Status409Conflict);
+
 	}
 
 	[HttpPut("{id}/toggleStatus")]
