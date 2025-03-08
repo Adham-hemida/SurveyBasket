@@ -10,6 +10,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 	public DbSet<Poll> Polls { get; set; }
 	public DbSet<Question> Questions { get; set; }
 	public DbSet<Answer> Answers{ get; set; }
+	public DbSet<Vote> Votes{ get; set; }
+	public DbSet<VoteAnswer> VoteAnswers{ get; set; }
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
