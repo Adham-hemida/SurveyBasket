@@ -15,6 +15,16 @@ public class PollService(ApplicationDbContext context) : IPollService
 
 		return Result.Success<IEnumerable<PollResponse>>( result);
 	}
+
+	public async Task<Result<IEnumerable<PollResponse>>> GetCurrentAsync( CancellationToken cancellationToken = default)
+	{  var result= await _context.Polls
+			.Where(x=>x.IsPublished && x.StartsAt<DateOnly.FromDateTime(DateTime.Now) && x.EndsAt > DateOnly.FromDateTime(DateTime.Now))
+			.AsNoTracking()
+			.ProjectToType<PollResponse>()
+			.ToListAsync(cancellationToken);
+
+		return Result.Success<IEnumerable<PollResponse>>( result);
+	}
 	
 	     
 
