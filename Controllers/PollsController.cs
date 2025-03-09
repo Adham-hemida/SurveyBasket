@@ -18,6 +18,15 @@ public class PollsController(IPollService pollService) : ControllerBase
 			?Ok(result.Value)
 			:result.ToProblem(statusCode:StatusCodes.Status404NotFound);
 	}
+	[HttpGet("current")]
+
+	public async Task<IActionResult> GetCurrent(CancellationToken cancellationToken = default)
+	{
+		var result = await _pollService.GetCurrentAsync(cancellationToken);
+		return result.IsSuccess
+			?Ok(result.Value)
+			:result.ToProblem(statusCode:StatusCodes.Status404NotFound);
+	}
 
 	[HttpGet("{id}")]
 	//[Route("{id}")]
