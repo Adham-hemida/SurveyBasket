@@ -33,10 +33,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 		var entries=ChangeTracker.Entries<AuditableEntity>();
 		foreach (var entry in entries)
 		{
-			var currentUserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+			var currentUserId = _httpContextAccessor.HttpContext?.User.GetUserId();
 			if (entry.State == EntityState.Added)
 			{
-				entry.Property(x => x.CreatedById).CurrentValue = currentUserId;
+				entry.Property(x => x.CreatedById).CurrentValue = currentUserId!;
 
 			}
 			else if (entry.State == EntityState.Modified)
