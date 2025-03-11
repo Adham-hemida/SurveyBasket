@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Errors;
-using System.Security.Claims;
-
+﻿
 namespace SurveyBasket.Controllers;
 [Route("api/Polls/{pollId}/Vote")]
 [ApiController]
@@ -11,7 +9,7 @@ public class VotesController(IQuestionService questionService) : ControllerBase
 	[HttpGet("")]
 	public async Task<IActionResult> Start([FromRoute] int pollId, CancellationToken cancellationToken)
 	{
-		var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+		var userId = User.GetUserId();
 		var result = await _questionService.GetAvailableAsync(pollId,userId!, cancellationToken);
 		
 		if(result.IsSuccess)
