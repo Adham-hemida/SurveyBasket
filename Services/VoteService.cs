@@ -31,7 +31,7 @@ public class VoteService(ApplicationDbContext context) : IVoteService
 		{
 			PollId = pollId,
 			UserId = userId,
-			//	VoteAnswers = request.Answers.Adapt<ICollection<VoteAnswer>>()
+			//VoteAnswers = request.Answers.Adapt<ICollection<VoteAnswer>>()
 			VoteAnswers = request.Answers.Select(x => new VoteAnswer
 			{
 				QuestionId = x.QuestionId,
