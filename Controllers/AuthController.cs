@@ -12,7 +12,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 		var authResult = await _authService.GetTokenAsync(request, cancellationToken);
 		return authResult.IsSuccess
 			? Ok(authResult.Value)
-			: authResult.ToProblem(statusCode: StatusCodes.Status400BadRequest);
+			: authResult.ToProblem();
 
 	}
 	[HttpPost("Refresh")]
@@ -22,7 +22,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 
 		return authResult.IsSuccess
 			? Ok(authResult.Value)
-			: authResult.ToProblem(statusCode: StatusCodes.Status400BadRequest);
+			: authResult.ToProblem();
 
 	}
 	[HttpPost("revoke-refresh-token")]
@@ -31,7 +31,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 		var result = await _authService.RevokeRefreshTokenAsync(request, cancellationToken);
 		return result.IsSuccess
 			? Ok()
-			:result.ToProblem(statusCode: StatusCodes.Status400BadRequest);
+			:result.ToProblem();
 
 	}
 
