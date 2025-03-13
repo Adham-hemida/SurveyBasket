@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace SurveyBasket.Controllers;
+﻿namespace SurveyBasket.Controllers;
 [Route("api/Polls/{pollId}/[controller]")]
 [ApiController]
 [Authorize]
@@ -10,7 +8,13 @@ public class ResultsController(IResultService resultService) : ControllerBase
 	[HttpGet("row-data")]
 	public async Task<IActionResult> PollVotes([FromRoute]int pollId,CancellationToken cancellationToken)
 	{
-		var result = await _resultService.GetPollVotesResponseAsync(pollId, cancellationToken);
+		var result = await _resultService.GetPollVotesAsync(pollId, cancellationToken);
+		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+	}	
+	[HttpGet("votes-per-day")]
+	public async Task<IActionResult> VotesPerDay([FromRoute]int pollId,CancellationToken cancellationToken)
+	{
+		var result = await _resultService.GetVotesPerDayAsync(pollId, cancellationToken);
 		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 	}
 }
