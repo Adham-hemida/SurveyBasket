@@ -42,4 +42,27 @@ public class ResultService(ApplicationDbContext context) : IResultService
 			.ToListAsync(cancellationToken);
 		return Result.Success<IEnumerable<VotesPerDayResponse>>(VotesPerDay);
 	}
+
+	public async Task<Result<IEnumerable<VotesPerQuestionResponse>>> GetVotesPerQuestionAsync(int pollId, CancellationToken cancellationToken = default)
+	{
+		var pollIsExists = await _context.Polls.AnyAsync(x => x.Id == pollId, cancellationToken);
+
+		if (!pollIsExists)
+			return Result.Failure<IEnumerable<VotesPerQuestionResponse>>(PollErrors.PollNotFound);
+
+		var VotesPerQuestion = await _context.VoteAnswers
+			.Where(x => x.Vote.PollId == pollId)
+			.Select(x => new VotesPerQuestionResponse(
+				x.Question.Content,
+				x.Question.Votes
+				   .GroupBy(g => new { AnswerId = g.Answer.Id, AnswerContent = g.Answer.Content })
+				   .Select(g => new VotesPerAnswerResponse(
+					  g.Key.AnswerContent,
+					  g.Count()
+					))
+				)).ToListAsync(cancellationToken);
+
+
+		return Result.Success<IEnumerable<VotesPerQuestionResponse>>(VotesPerQuestion);
+	}
 }
