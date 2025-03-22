@@ -5,6 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
 builder.Host.UseSerilog((context,configuration) 
     => configuration.ReadFrom.Configuration(context.Configuration));
+
+builder.Services.AddDistributedMemoryCache();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
