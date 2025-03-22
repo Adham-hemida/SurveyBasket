@@ -28,6 +28,8 @@ public static class DependencyInjection
 			options => options.UseSqlServer(connectionString)
 		  );
 
+		services.AddHybridCache();
+
 		services.AddControllers();
 		services.AddAuthConfig(configuration);
 		services.
@@ -39,7 +41,6 @@ public static class DependencyInjection
 		services.AddScoped<IQuestionService,Questionservice>();
 		services.AddScoped<IVoteService,VoteService>();
 		services.AddScoped<IResultService, ResultService>();
-		services.AddScoped<ICacheService, CacheService>();
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
 		services.AddProblemDetails();
