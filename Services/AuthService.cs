@@ -5,37 +5,43 @@ using System.Security.Cryptography;
 
 namespace SurveyBasket.Services;
 
-public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider jwtProvider) : IAuthService
+public class AuthService(
+	UserManager<ApplicationUser> userManager,
+	SignInManager<ApplicationUser> signInManager,
+	IJwtProvider jwtProvider
+	) : IAuthService
 {
 	private readonly UserManager<ApplicationUser> _userManager = userManager;
+	private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 	private readonly IJwtProvider _jwtProvider = jwtProvider;
 	private readonly int _refreshTokenExpirationDays=14;
 
 	public async Task<Result<AuthResponse>> GetTokenAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default)
 	{
-		var user = await _userManager.FindByEmailAsync(loginRequest.Email);
 
-		if (user is null)
+		if (await _userManager.FindByEmailAsync(loginRequest.Email) is not { } user)
 			return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-		var isValidPassword = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
-		if (!isValidPassword)
-			return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
+		var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, false);
+		if (result.Succeeded)
+		   {
+			var (token, expiresIn) = _jwtProvider.GenerateJwtToken(user);
 
-		var (token, expiresIn) = _jwtProvider.GenerateJwtToken(user);
-		
-		var refreshToken = GenerateRefreshToken();
-		var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
+			var refreshToken = GenerateRefreshToken();
+			var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
 
-		user.RefreshTokens.Add(new RefreshToken
-		{
-			Token = refreshToken,
-			ExpiresOn = refreshTokenExpiration
-		});
+			user.RefreshTokens.Add(new RefreshToken
+			{
+				Token = refreshToken,
+				ExpiresOn = refreshTokenExpiration
+			});
 
-		await _userManager.UpdateAsync(user);
-		var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
-		return Result.Success(response);
+			await _userManager.UpdateAsync(user);
+			var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
+			return Result.Success(response);
+		  }
+		return Result.Failure<AuthResponse>(result.IsNotAllowed ?UserErrors.EmailNotConfirmed:UserErrors.InvalidCredentials);
+
 	}
 
 
