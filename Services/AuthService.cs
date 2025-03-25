@@ -85,6 +85,35 @@ public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider j
 		await _userManager.UpdateAsync(user);
 		return Result.Success();
 	}
+	public async Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+	{
+		var emailExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
+		if (emailExists)
+			return Result.Failure<AuthResponse>(UserErrors.DuplicatedEmail);
+
+		var user = request.Adapt<ApplicationUser>();
+		var result = await _userManager.CreateAsync(user, request.Password);
+		if (result.Succeeded)
+		{
+			var (token, expiresIn) = _jwtProvider.GenerateJwtToken(user);
+			var refreshToken = GenerateRefreshToken();
+			var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
+			user.RefreshTokens.Add(new RefreshToken
+			{
+				Token = refreshToken,
+				ExpiresOn = refreshTokenExpiration
+			});
+			await _userManager.UpdateAsync(user);
+			var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
+			return Result.Success(response);
+		}
+		else
+		{
+			var error = result.Errors.First();
+			return Result.Failure<AuthResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+		}
+	}
+
 	private static string GenerateRefreshToken()
 	{
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
