@@ -1,44 +1,50 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Authentication;
-using SurveyBasket.Errors;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace SurveyBasket.Services;
 
-public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider jwtProvider) : IAuthService
+public class AuthService(
+	UserManager<ApplicationUser> userManager,
+	SignInManager<ApplicationUser> signInManager,
+	IJwtProvider jwtProvider,
+	ILogger<AuthService> logger
+	) : IAuthService
 {
 	private readonly UserManager<ApplicationUser> _userManager = userManager;
+	private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 	private readonly IJwtProvider _jwtProvider = jwtProvider;
+	private readonly ILogger<AuthService> _logger = logger;
 	private readonly int _refreshTokenExpirationDays=14;
 
 	public async Task<Result<AuthResponse>> GetTokenAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default)
 	{
-		var user = await _userManager.FindByEmailAsync(loginRequest.Email);
 
-		if (user is null)
+		if (await _userManager.FindByEmailAsync(loginRequest.Email) is not { } user)
 			return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-		var isValidPassword = await _userManager.CheckPasswordAsync(user, loginRequest.Password);
-		if (!isValidPassword)
-			return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
+		var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, false);
+		if (result.Succeeded)
+		   {
+			var (token, expiresIn) = _jwtProvider.GenerateJwtToken(user);
 
-		var (token, expiresIn) = _jwtProvider.GenerateJwtToken(user);
-		
-		var refreshToken = GenerateRefreshToken();
-		var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
+			var refreshToken = GenerateRefreshToken();
+			var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
 
-		user.RefreshTokens.Add(new RefreshToken
-		{
-			Token = refreshToken,
-			ExpiresOn = refreshTokenExpiration
-		});
+			user.RefreshTokens.Add(new RefreshToken
+			{
+				Token = refreshToken,
+				ExpiresOn = refreshTokenExpiration
+			});
 
-		await _userManager.UpdateAsync(user);
-		var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
-		return Result.Success(response);
+			await _userManager.UpdateAsync(user);
+			var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
+			return Result.Success(response);
+		  }
+		return Result.Failure<AuthResponse>(result.IsNotAllowed ?UserErrors.EmailNotConfirmed:UserErrors.InvalidCredentials);
 	}
-
-
 
 	public async Task<Result<AuthResponse>> GetRefreshTokenAsync(RefreshTokenRequest refreshTokenRequest, CancellationToken cancellationToken = default)
 	{
@@ -85,6 +91,30 @@ public class AuthService(UserManager<ApplicationUser> userManager,IJwtProvider j
 		await _userManager.UpdateAsync(user);
 		return Result.Success();
 	}
+	public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
+	{
+		var emailExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
+		if (emailExists)
+			return Result.Failure<AuthResponse>(UserErrors.DuplicatedEmail);
+
+		var user = request.Adapt<ApplicationUser>();
+		var result = await _userManager.CreateAsync(user, request.Password);
+		if (result.Succeeded)
+		{
+			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+			code= WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+			_logger.LogInformation("Confirmation code: {code}", code);
+
+			//TODO: Send email with the confirmation link
+			return Result.Success();
+		}
+		else
+		{
+			var error = result.Errors.First();
+			return Result.Failure<AuthResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+		}
+	}
+
 	private static string GenerateRefreshToken()
 	{
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));

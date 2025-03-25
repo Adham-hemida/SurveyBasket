@@ -7,32 +7,34 @@ public class AuthController(IAuthService authService,ILogger<AuthController> log
 	private readonly ILogger<AuthController> _logger = logger;
 
 	[HttpPost("")]
-	public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
+	public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
 	{
 		_logger.LogInformation("loggging with email {email} and password {password}", request.Email, request.Password);
 		var authResult = await _authService.GetTokenAsync(request, cancellationToken);
-		return authResult.IsSuccess
-			? Ok(authResult.Value)
-			: authResult.ToProblem();
+		return authResult.IsSuccess	? Ok(authResult.Value): authResult.ToProblem();
 
 	}
 	[HttpPost("Refresh")]
-	public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
+	public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
 	{
 		var authResult = await _authService.GetRefreshTokenAsync(request, cancellationToken);
 
-		return authResult.IsSuccess
-			? Ok(authResult.Value)
-			: authResult.ToProblem();
+		return authResult.IsSuccess? Ok(authResult.Value)	: authResult.ToProblem();
 
 	}
 	[HttpPost("revoke-refresh-token")]
 	public async Task<IActionResult> RevokeRefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
 	{
 		var result = await _authService.RevokeRefreshTokenAsync(request, cancellationToken);
-		return result.IsSuccess
-			? Ok()
-			:result.ToProblem();
+		return result.IsSuccess? Ok():result.ToProblem();
+
+	}
+	[HttpPost("register")]
+	public async Task<IActionResult> Register([FromBody]RegisterRequest request, CancellationToken cancellationToken = default)
+	{
+		var result = await _authService.RegisterAsync(request, cancellationToken);
+
+		return result.IsSuccess	? Ok(): result.ToProblem();
 
 	}
 
