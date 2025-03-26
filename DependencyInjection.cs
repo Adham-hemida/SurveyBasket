@@ -2,8 +2,10 @@
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Authentication;
+using SurveyBasket.Settings;
 using System.Text;
 
 namespace SurveyBasket;
@@ -38,6 +40,7 @@ public static class DependencyInjection
 
 		services.AddScoped<IPollService, PollService>();
 		services.AddScoped<IAuthService, AuthService>();
+		services.AddScoped<IEmailSender, EmailService>();
 		services.AddScoped<IQuestionService,Questionservice>();
 		services.AddScoped<IVoteService,VoteService>();
 		services.AddScoped<IResultService, ResultService>();
@@ -46,6 +49,8 @@ public static class DependencyInjection
 		services.AddProblemDetails();
 
 		services.AddOpenApi();
+		
+		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
 		return services;
 	}
