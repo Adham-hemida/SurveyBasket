@@ -35,7 +35,20 @@ public class AuthController(IAuthService authService,ILogger<AuthController> log
 		var result = await _authService.RegisterAsync(request, cancellationToken);
 
 		return result.IsSuccess	? Ok(): result.ToProblem();
+	}	
+	[HttpPost("confirm-email")]
+	public async Task<IActionResult> ConfirmEmail([FromBody]ConfirmEmailRequest request, CancellationToken cancellationToken = default)
+	{
+		var result = await _authService.ConfirmEmailAsync(request);
 
+		return result.IsSuccess	? Ok(): result.ToProblem();
+	}
+	[HttpPost("resend-confirm-email")]
+	public async Task<IActionResult> ResendConfirmEmail([FromBody]ResendConfirmEmailRequest request, CancellationToken cancellationToken = default)
+	{
+		var result = await _authService.ResendConfirmEmailAsync(request);
+
+		return result.IsSuccess	? Ok(): result.ToProblem();
 	}
 
 }
