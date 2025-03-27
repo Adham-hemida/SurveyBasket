@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Authentication;
+using SurveyBasket.Helpers;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -10,13 +12,17 @@ public class AuthService(
 	UserManager<ApplicationUser> userManager,
 	SignInManager<ApplicationUser> signInManager,
 	IJwtProvider jwtProvider,
-	ILogger<AuthService> logger
+	ILogger<AuthService> logger,
+	IEmailSender emailSender,
+	IHttpContextAccessor httpContextAccessor
 	) : IAuthService
 {
 	private readonly UserManager<ApplicationUser> _userManager = userManager;
 	private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
 	private readonly IJwtProvider _jwtProvider = jwtProvider;
 	private readonly ILogger<AuthService> _logger = logger;
+	private readonly IEmailSender _emailSender = emailSender;
+	private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 	private readonly int _refreshTokenExpirationDays=14;
 
 	public async Task<Result<AuthResponse>> GetTokenAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default)
@@ -106,6 +112,7 @@ public class AuthService(
 			_logger.LogInformation("Confirmation code: {code}", code);
 
 			//TODO: Send email with the confirmation link
+			await SendConfirmationEmail(user, code);
 			return Result.Success();
 		}
 		else
@@ -155,6 +162,7 @@ public class AuthService(
 		_logger.LogInformation("Confirmation code: {code}", code);
 
 		//TODO: Send email with the confirmation link
+		await SendConfirmationEmail(user,code);
 		return Result.Success();
 
 	}
@@ -164,6 +172,20 @@ public class AuthService(
 	{
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 	}
+	private async Task SendConfirmationEmail(ApplicationUser user, string code)
+	{
+		var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
 
-	
+		var emailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation",
+			templateModel: new Dictionary<string, string>
+			{
+				{ "{{name}}", user.FirstName },
+					{ "{{action_url}}", $"{origin}/auth/emailConfirmation?userId={user.Id}&code={code}" }
+			}
+		);
+
+		await _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket: Email Confirmation", emailBody);
+	}
+
+
 }

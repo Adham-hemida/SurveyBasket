@@ -50,6 +50,7 @@ public static class DependencyInjection
 
 		services.AddOpenApi();
 		
+		services.AddHttpContextAccessor();
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
 		return services;
