@@ -1,3 +1,4 @@
+using Hangfire;
 using Serilog;
 using SurveyBasket;
 
@@ -18,6 +19,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
+app.UseHangfireDashboard("/jobs");
+
 app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
