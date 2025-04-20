@@ -182,6 +182,31 @@ public class AuthService(
 
 	}
 
+	public async Task<Result> ResetPasswordAsync(ResetPasswordRequest request)
+	{
+		var user = await _userManager.FindByEmailAsync(request.Email);
+		if (user is null || !user.EmailConfirmed)
+			return Result.Failure(UserErrors.InvalidCode);
+		IdentityResult result;
+		try
+		{
+			var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
+			result = await _userManager.ResetPasswordAsync(user, code, request.NewPassword);
+		}
+		catch (FormatException)
+		{
+			result = IdentityResult.Failed(_userManager.ErrorDescriber.InvalidToken());
+		}
+		if (result.Succeeded)
+			return Result.Success();
+		else
+		{
+			var error = result.Errors.First();
+			return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status401Unauthorized));
+		}
+	}
+
+
 
 	private static string GenerateRefreshToken()
 	{
