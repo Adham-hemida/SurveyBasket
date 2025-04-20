@@ -168,11 +168,27 @@ public class AuthService(
 
 	}
 
+	public async Task<Result> SendResetPasswordCodeAsync(string email)
+	{
+		if (await _userManager.FindByEmailAsync(email) is not { } user)
+			return Result.Success();
+
+		var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+		_logger.LogInformation("Reset password code: {code}", code);
+
+		await SendResetPasswordEmail(user, code);
+		return Result.Success();
+
+	}
+
 
 	private static string GenerateRefreshToken()
 	{
 		return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 	}
+
+
 	private async Task SendConfirmationEmail(ApplicationUser user, string code)
 	{
 		var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
@@ -186,6 +202,22 @@ public class AuthService(
 		);
 
 		BackgroundJob.Enqueue(()=> _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket: Email Confirmation", emailBody));
+		await Task.CompletedTask;
+	}
+
+	private async Task SendResetPasswordEmail(ApplicationUser user, string code)
+	{
+		var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
+
+		var emailBody = EmailBodyBuilder.GenerateEmailBody("ForgetPassword",
+			templateModel: new Dictionary<string, string>
+			{
+				{ "{{name}}", user.FirstName },
+					{ "{{action_url}}", $"{origin}/auth/forgetPassword?email={user.Email}&code={code}" }
+			}
+		);
+
+		BackgroundJob.Enqueue(()=> _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket: Change Password", emailBody));
 		await Task.CompletedTask;
 	}
 
