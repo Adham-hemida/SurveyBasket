@@ -155,7 +155,7 @@ public class AuthService(
 		if (await _userManager.FindByEmailAsync(request.Email) is not { } user)
 			return Result.Success();
 
-		if (user.EmailConfirmed)
+		if (!user.EmailConfirmed)
 			return Result.Failure(UserErrors.DuplicatedConfirmation);
 
 		var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -172,6 +172,9 @@ public class AuthService(
 	{
 		if (await _userManager.FindByEmailAsync(email) is not { } user)
 			return Result.Success();
+
+		if (!user.EmailConfirmed)
+			return Result.Failure(UserErrors.EmailNotConfirmed);
 
 		var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
