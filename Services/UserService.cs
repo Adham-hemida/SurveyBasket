@@ -19,9 +19,16 @@ public class UserService(UserManager<ApplicationUser> userManager) : IUserServic
 	}
 	public async Task<Result> UpdateProfileAsync(string userId, UpdateProfileRequest request)
 	{
-		var user = await _userManager.FindByIdAsync(userId);
-		user = request.Adapt(user);
-		await _userManager.UpdateAsync(user!);
+		//var user = await _userManager.FindByIdAsync(userId);
+		//user = request.Adapt(user);
+		//await _userManager.UpdateAsync(user!);
+
+		var user = await _userManager.Users
+			.Where(x => x.Id == userId)
+			.ExecuteUpdateAsync(setter =>
+				setter.SetProperty(x => x.FirstName, request.FirstName)
+					.SetProperty(x => x.LastName, request.LastName)
+			);
 
 		return Result.Success(user);
 	}
