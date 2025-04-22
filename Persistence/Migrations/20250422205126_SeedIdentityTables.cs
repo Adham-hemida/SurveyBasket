@@ -24,7 +24,7 @@ namespace SurveyBasket.Persistence.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "01965d90-71b8-72b4-a99f-de3822dece9b", 0, "01965d90-71b8-72b4-a99f-de3983d1dd83", "Admin@survey-basket.com", true, "Survey Basket", "Admin", false, null, "ADMIN@SURVEY-BASKET.COM", "ADMIN@SURVEY-BASKET.COM", "AQAAAAIAAYagAAAAELoGZrMv4TciZbP7XLEZsMd3TNoSns5sH66M6WBrUdPB+zYxkGUxnxsmRLqSRy9+2w==", null, false, "96923A823048450C8D534A5B8C09549F", false, "Admin@survey-basket.com" });
+                values: new object[] { "01965d90-71b8-72b4-a99f-de3822dece9b", 0, "01965d90-71b8-72b4-a99f-de3983d1dd83", "Admin@survey-basket.com", true, "Survey Basket", "Admin", false, null, "ADMIN@SURVEY-BASKET.COM", "ADMIN@SURVEY-BASKET.COM", "AQAAAAIAAYagAAAAEIwo2J7iINMV3BMBavwBUGZT09tgnaAjUSeoCH9USDE9u4uQ8sYklAFbxhwNRZdH8A==", null, false, "96923A823048450C8D534A5B8C09549F", false, "Admin@survey-basket.com" });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoleClaims",
