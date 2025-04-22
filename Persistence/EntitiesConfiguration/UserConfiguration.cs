@@ -1,5 +1,7 @@
 ﻿
 
+using Microsoft.EntityFrameworkCore.Migrations;
+
 namespace SurveyBasket.Persistence.EntitiesConfiguration;
 
 public class UserConfiguration : IEntityTypeConfiguration <ApplicationUser>
@@ -14,7 +16,6 @@ public class UserConfiguration : IEntityTypeConfiguration <ApplicationUser>
 			.ToTable("RefreshTokens")
 			.WithOwner().HasForeignKey("UserId");
 
-		var passwordHasher = new PasswordHasher<ApplicationUser>();
 		//Default Data
 		builder.HasData(new ApplicationUser
 		{
@@ -28,7 +29,7 @@ public class UserConfiguration : IEntityTypeConfiguration <ApplicationUser>
 			SecurityStamp = DefaultUsers.AdminSecurityStamp,
 			ConcurrencyStamp = DefaultUsers.AdminConcurrencyStamp,
 			EmailConfirmed = true,
-			PasswordHash=passwordHasher.HashPassword(null!, DefaultUsers.AdminPassword),
+			PasswordHash= DefaultUsers.PasswordHash
 		});
 	}
 }
