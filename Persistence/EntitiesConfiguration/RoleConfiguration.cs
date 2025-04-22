@@ -4,7 +4,7 @@ public class RoleConfiguration:IEntityTypeConfiguration<ApplicationRole>
 {
 	public void Configure(EntityTypeBuilder<ApplicationRole> builder)
 	{
-
+		// Default Data
 		builder.HasData([
 			new ApplicationRole{
 				Id = DefaultRoles.AdminRoleId,
