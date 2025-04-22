@@ -142,7 +142,10 @@ public class AuthService(
 		var result= await _userManager.ConfirmEmailAsync(user, code);
 
 		if (result.Succeeded)
+		{ 
+			await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
 			return Result.Success();
+		}
 		else
 		{
 			var error = result.Errors.First();

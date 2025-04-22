@@ -12,7 +12,7 @@ using SurveyBasket.Persistence;
 namespace SurveyBasket.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250422172257_SeedIdentityTables")]
+    [Migration("20250422205126_SeedIdentityTables")]
     partial class SeedIdentityTables
     {
         /// <inheritdoc />
@@ -405,7 +405,7 @@ namespace SurveyBasket.Persistence.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@SURVEY-BASKET.COM",
                             NormalizedUserName = "ADMIN@SURVEY-BASKET.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAELoGZrMv4TciZbP7XLEZsMd3TNoSns5sH66M6WBrUdPB+zYxkGUxnxsmRLqSRy9+2w==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIwo2J7iINMV3BMBavwBUGZT09tgnaAjUSeoCH9USDE9u4uQ8sYklAFbxhwNRZdH8A==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "96923A823048450C8D534A5B8C09549F",
                             TwoFactorEnabled = false,
