@@ -15,7 +15,8 @@ public class AuthService(
 	IJwtProvider jwtProvider,
 	ILogger<AuthService> logger,
 	IEmailSender emailSender,
-	IHttpContextAccessor httpContextAccessor
+	IHttpContextAccessor httpContextAccessor,
+	ApplicationDbContext context
 	) : IAuthService
 {
 	private readonly UserManager<ApplicationUser> _userManager = userManager;
@@ -24,6 +25,7 @@ public class AuthService(
 	private readonly ILogger<AuthService> _logger = logger;
 	private readonly IEmailSender _emailSender = emailSender;
 	private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+	private readonly ApplicationDbContext _context = context;
 	private readonly int _refreshTokenExpirationDays=14;
 
 	public async Task<Result<AuthResponse>> GetTokenAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default)
@@ -35,7 +37,8 @@ public class AuthService(
 		var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, false);
 		if (result.Succeeded)
 		   {
-			var (token, expiresIn) = _jwtProvider.GenerateJwtToken(user);
+			var (userRoles, userPermissions) = await GetUserRolesPermissions(user, cancellationToken);
+			var (token, expiresIn) = _jwtProvider.GenerateJwtToken(user, userRoles, userPermissions);
 
 			var refreshToken = GenerateRefreshToken();
 			var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
@@ -69,7 +72,8 @@ public class AuthService(
 
 		userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-		var (newToken, expiresIn) = _jwtProvider.GenerateJwtToken(user);
+		var(userRoles, userPermissions) = await GetUserRolesPermissions(user, cancellationToken);
+		var (newToken, expiresIn) = _jwtProvider.GenerateJwtToken(user,userRoles, userPermissions);
 		var newRefreshToken = GenerateRefreshToken();
 		var newRefreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
 
@@ -252,5 +256,19 @@ public class AuthService(
 		await Task.CompletedTask;
 	}
 
+	private async Task<(IEnumerable<string>roles,IEnumerable<string>permissions)>GetUserRolesPermissions(ApplicationUser user,CancellationToken cancellationToken)
+	{
+		var userRoles=await _userManager.GetRolesAsync(user);
 
+		var userPermissions=await (
+			from r in _context.Roles
+			join p in _context.RoleClaims
+			on r.Id equals p.RoleId
+			where userRoles.Contains(r.Name!)
+			select p.ClaimValue!)
+			.Distinct()
+			.ToListAsync(cancellationToken);
+
+		return (userRoles,userPermissions);
+	}
 }
