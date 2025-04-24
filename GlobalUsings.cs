@@ -19,6 +19,8 @@ global using SurveyBasket.Errors;
 global using SurveyBasket.Extensions;
 global using Microsoft.AspNetCore.Identity;
 global using SurveyBasket.Abstractions.Const;
+global using SurveyBasket.Authentication.Filters;
+
 
 
 

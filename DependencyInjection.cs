@@ -86,6 +86,9 @@ public static class DependencyInjection
 			.AddEntityFrameworkStores<ApplicationDbContext>()
 			.AddDefaultTokenProviders();
 
+		services.AddTransient<IAuthorizationHandler,PermissionAuthorizationHandler>();
+		services.AddTransient<IAuthorizationPolicyProvider,PermissionAuthorizationPolicyProvider>();
+
 		services.AddSingleton<IJwtProvider, JwtProvider>();
 
 	   // services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.sectionName));
