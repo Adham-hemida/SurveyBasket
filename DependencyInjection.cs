@@ -42,6 +42,7 @@ public static class DependencyInjection
 		services.AddScoped<IPollService, PollService>();
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<IUserService, UserService>();
+		services.AddScoped<IRoleService, RoleService>();
 		services.AddScoped<IEmailSender, EmailService>();
 		services.AddScoped<IQuestionService,Questionservice>();
 		services.AddScoped<IVoteService,VoteService>();
