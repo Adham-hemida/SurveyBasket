@@ -16,4 +16,15 @@ public class RoleService(RoleManager<ApplicationRole> roleManager):IRoleService
 			x.IsDeleted))
 			.ToListAsync(cancellationToken);
 	}
+	public async Task<Result<RoleDetailResponse>> GetAsync(string id)
+	{
+		if (await _roleManager.FindByIdAsync(id) is not { } role)
+			return Result.Failure<RoleDetailResponse>(RolesError.RoleNotFound);
+
+		var permissions=await _roleManager.GetClaimsAsync(role);
+
+		var response=new RoleDetailResponse(role.Id,role.Name!,role.IsDeleted,permissions.Select(x=>x.Value));
+
+		return Result.Success(response);
+	}
 }
