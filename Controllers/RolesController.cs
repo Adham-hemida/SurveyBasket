@@ -1,4 +1,5 @@
 ﻿
+using SurveyBasket.Contracts.Roles;
 using System.Data;
 
 namespace SurveyBasket.Controllers;
@@ -21,6 +22,13 @@ public class RolesController(IRoleService roleService) : ControllerBase
 	public async Task<IActionResult> Get([FromRoute]string id)
 	{
 		var result = await _roleService.GetAsync(id);
+		return result.IsSuccess? Ok(result.Value): result.ToProblem();
+	}
+	[HttpPost("")]
+	[HasPermission(Permissions.AddRoles)]
+	public async Task<IActionResult> Add([FromBody] RoleRequest request)
+	{
+		var result = await _roleService.AddAsync(request);
 		return result.IsSuccess? Ok(result.Value): result.ToProblem();
 	}
 }
