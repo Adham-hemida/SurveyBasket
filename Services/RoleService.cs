@@ -1,4 +1,5 @@
-﻿using SurveyBasket.Contracts.Roles;
+﻿using Microsoft.Identity.Client;
+using SurveyBasket.Contracts.Roles;
 
 namespace SurveyBasket.Services;
 
@@ -68,6 +69,59 @@ public class RoleService(
 			var errors = result.Errors.First();
 			return Result.Failure<RoleDetailResponse>(new Error(errors.Code,errors.Description,StatusCodes.Status400BadRequest));
 		}
+	}
+
+	public async Task<Result> UpdateAsync(string id, RoleRequest request)
+	{
+		var roleIsExists = await _roleManager.Roles.AnyAsync(x=>x.Name==request.Name && x.Id != id);
+		if (roleIsExists)
+			return Result.Failure(RolesError.RoleDuplicated);
+
+		if (await _roleManager.FindByIdAsync(id) is not { } role)
+			return Result.Failure(RolesError.RoleNotFound);
+
+		var allowedPermissions = Permissions.GetAllPermissions();
+
+		if (request.Permissions.Except(allowedPermissions).Any())
+			return Result.Failure<RoleDetailResponse>(RolesError.InvalidPermissions);
+
+		role.Name = request.Name;
+		var result = await _roleManager.UpdateAsync(role);
+
+		if (result.Succeeded)
+		{
+			var currentPermissions = await _context.RoleClaims
+				.Where(x=>x.RoleId == role.Id&& x.ClaimType == Permissions.Type)
+				.Select(x=>x.ClaimValue)
+				.ToListAsync();
+
+			var newPermissions=request.Permissions
+				.Except(currentPermissions)
+				.Select(x => new IdentityRoleClaim<string>
+				{
+					ClaimType = Permissions.Type,
+					ClaimValue = x,
+					RoleId = role.Id
+				});
+
+			var removedPermissions = currentPermissions.Except(request.Permissions);
+
+			await _context.RoleClaims
+				.Where(x => x.RoleId == role.Id && removedPermissions.Contains(x.ClaimValue))
+				.ExecuteDeleteAsync();
+
+			await _context.AddRangeAsync(newPermissions);
+			await _context.SaveChangesAsync();
+		
+			return Result.Success();
+
+		}
+		else
+		{
+			var errors = result.Errors.First();
+			return Result.Failure<RoleDetailResponse>(new Error(errors.Code, errors.Description, StatusCodes.Status400BadRequest));
+		}
 
 	}
+
 }
