@@ -34,6 +34,9 @@ public class AuthService(
 		if (await _userManager.FindByEmailAsync(loginRequest.Email) is not { } user)
 			return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
+		if (user.IsDisabled)
+			return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
+
 		var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, false);
 		if (result.Succeeded)
 		   {
@@ -53,6 +56,7 @@ public class AuthService(
 			var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
 			return Result.Success(response);
 		  }
+
 		return Result.Failure<AuthResponse>(result.IsNotAllowed ?UserErrors.EmailNotConfirmed:UserErrors.InvalidCredentials);
 	}
 
