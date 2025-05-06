@@ -26,6 +26,9 @@ public  static class UserErrors
 	public static readonly Error InvalidCode =
 	new("User.InvalidCode", "Invalid code", StatusCodes.Status401Unauthorized);
 
+	public static readonly Error UserNotFound =
+new("User.UserNotFound", "User is not found", StatusCodes.Status404NotFound);
+
 
 	public static readonly Error DuplicatedConfirmation =
 	new("User.DuplicatedConfirmation", "Email already confirmed", StatusCodes.Status400BadRequest);
