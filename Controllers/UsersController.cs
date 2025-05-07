@@ -24,12 +24,20 @@ public class UsersController(IUserService userService) : ControllerBase
 		return result.IsSuccess ? Ok(result.Value)
 			: result.ToProblem();
 	}	
-	[HttpPut("")]
+	[HttpPost("")]
 	[HasPermission(Permissions.AddUsers)]
 	public async Task<IActionResult> Add([FromBody] CreateUserRequest request,CancellationToken cancellationToken)
 	{
 		var result = await _userService.AddAsync(request, cancellationToken);
 		return result.IsSuccess ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value)
+			: result.ToProblem();
+	}
+	[HttpPut("{id}")]
+	[HasPermission(Permissions.UpdateUsers)]
+	public async Task<IActionResult> Update([FromRoute]string id,[FromBody] UpdateUserRequest request,CancellationToken cancellationToken)
+	{
+		var result = await _userService.UpdateAsync(id,request, cancellationToken);
+		return result.IsSuccess ? NoContent()
 			: result.ToProblem();
 	}
 }
