@@ -187,5 +187,17 @@ public class UserService(UserManager<ApplicationUser> userManager,
 		return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 	}
 
+	public async Task<Result> ToggleSatausAsync(string id)
+	{
+		var user = await _userManager.FindByIdAsync(id);
+		if (user is null)
+			return Result.Failure(UserErrors.UserNotFound);
+
+		user.IsDisabled = !user.IsDisabled;
+
+		await _userManager.UpdateAsync(user);
+
+		return Result.Success();
+	}
 
 }
