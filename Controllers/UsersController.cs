@@ -24,7 +24,7 @@ public class UsersController(IUserService userService) : ControllerBase
 		return result.IsSuccess ? Ok(result.Value)
 			: result.ToProblem();
 	}	
-	[HttpPut("")]
+	[HttpPost("")]
 	[HasPermission(Permissions.AddUsers)]
 	public async Task<IActionResult> Add([FromBody] CreateUserRequest request,CancellationToken cancellationToken)
 	{
