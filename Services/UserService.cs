@@ -18,65 +18,65 @@ public class UserService(UserManager<ApplicationUser> userManager,
 
 	public async Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
-	//	return await (from u in _context.Users
-	//				  join ur in _context.UserRoles
-	//				  on u.Id equals ur.UserId
-	//				  join r in _context.Roles
-	//				  on ur.RoleId equals r.Id into roles
-	//				  where !roles.Any(x => x.Name == DefaultRoles.Member)
-	//				  select new
-	//				  {
-	//					  u.Id,
-	//					  u.FirstName,
-	//					  u.LastName,
-	//					  u.Email,
-	//					  u.IsDisabled,
-	//					  Roles = roles.Select(x => x.Name!).ToList()
-	//				  }
-	//			)
-	//			.GroupBy(u => new { u.Id, u.FirstName, u.LastName, u.Email, u.IsDisabled })
-	//			.Select(u => new UserResponse
-	//			(
-	//				u.Key.Id,
-	//				u.Key.FirstName,
-	//				u.Key.LastName,
-	//				u.Key.Email,
-	//				u.Key.IsDisabled,
-	//				u.SelectMany(x => x.Roles)
-	//			))
-	//		   .ToListAsync(cancellationToken);
-	var usersWithMemberRole = await(
-	from ur in _context.UserRoles
-	join r in _context.Roles on ur.RoleId equals r.Id
-	where r.Name == DefaultRoles.Member
-	select ur.UserId
-).Distinct().ToListAsync(cancellationToken);
-
-	var result = await(
-		from u in _context.Users
-		where !usersWithMemberRole.Contains(u.Id)
-		join ur in _context.UserRoles on u.Id equals ur.UserId
+		//	return await (from u in _context.Users
+		//				  join ur in _context.UserRoles
+		//				  on u.Id equals ur.UserId
+		//				  join r in _context.Roles
+		//				  on ur.RoleId equals r.Id into roles
+		//				  where !roles.Any(x => x.Name == DefaultRoles.Member)
+		//				  select new
+		//				  {
+		//					  u.Id,
+		//					  u.FirstName,
+		//					  u.LastName,
+		//					  u.Email,
+		//					  u.IsDisabled,
+		//					  Roles = roles.Select(x => x.Name!).ToList()
+		//				  }
+		//			)
+		//			.GroupBy(u => new { u.Id, u.FirstName, u.LastName, u.Email, u.IsDisabled })
+		//			.Select(u => new UserResponse
+		//			(
+		//				u.Key.Id,
+		//				u.Key.FirstName,
+		//				u.Key.LastName,
+		//				u.Key.Email,
+		//				u.Key.IsDisabled,
+		//				u.SelectMany(x => x.Roles)
+		//			))
+		//		   .ToListAsync(cancellationToken);
+		var usersWithMemberRole = await (
+		from ur in _context.UserRoles
 		join r in _context.Roles on ur.RoleId equals r.Id
-		select new
-		{
-			u.Id,
-			u.FirstName,
-			u.LastName,
-			u.Email,
-			u.IsDisabled,
-			RoleName = r.Name!
-		}
-	)
-	.GroupBy(x => new { x.Id, x.FirstName, x.LastName, x.Email, x.IsDisabled })
-	.Select(g => new UserResponse(
-		g.Key.Id,
-		g.Key.FirstName,
-		g.Key.LastName,
-		g.Key.Email,
-		g.Key.IsDisabled,
-		g.Select(x => x.RoleName)
-	))
-	.ToListAsync(cancellationToken);
+		where r.Name == DefaultRoles.Member
+		select ur.UserId
+	).Distinct().ToListAsync(cancellationToken);
+
+		var result = await (
+			from u in _context.Users
+			where !usersWithMemberRole.Contains(u.Id)
+			join ur in _context.UserRoles on u.Id equals ur.UserId
+			join r in _context.Roles on ur.RoleId equals r.Id
+			select new
+			{
+				u.Id,
+				u.FirstName,
+				u.LastName,
+				u.Email,
+				u.IsDisabled,
+				RoleName = r.Name!
+			}
+		)
+		.GroupBy(x => new { x.Id, x.FirstName, x.LastName, x.Email, x.IsDisabled })
+		.Select(g => new UserResponse(
+			g.Key.Id,
+			g.Key.FirstName,
+			g.Key.LastName,
+			g.Key.Email,
+			g.Key.IsDisabled,
+			g.Select(x => x.RoleName)
+		))
+		.ToListAsync(cancellationToken);
 		return result;
 	}
 
@@ -91,19 +91,19 @@ public class UserService(UserManager<ApplicationUser> userManager,
 		return Result.Success(response);
 	}
 
-	public async Task<Result<UserResponse>> AddAsync(CreateUserRequest request, CancellationToken cancellationToken=default)
+	public async Task<Result<UserResponse>> AddAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
 	{
-		var emailIsExist= await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
+		var emailIsExist = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
 		if (emailIsExist)
 			return Result.Failure<UserResponse>(UserErrors.DuplicatedEmail);
 
-		var allowRoles= await _roleService.GetAllAsync(cancellationToken:cancellationToken);
+		var allowRoles = await _roleService.GetAllAsync(cancellationToken: cancellationToken);
 
 		if (request.Roles.Except(allowRoles.Select(x => x.Name)).Any())
 			return Result.Failure<UserResponse>(UserErrors.InvalidRoles);
 
 		var user = request.Adapt<ApplicationUser>();
-		var result= await _userManager.CreateAsync(user, request.Password);
+		var result = await _userManager.CreateAsync(user, request.Password);
 		if (result.Succeeded)
 		{
 			await _userManager.AddToRolesAsync(user, request.Roles);
@@ -118,6 +118,37 @@ public class UserService(UserManager<ApplicationUser> userManager,
 	}
 
 
+	public async Task<Result> UpdateAsync(string id, UpdateUserRequest request, CancellationToken cancellationToken=default)
+	{
+		var emailIsExist = await _userManager.Users.AnyAsync(x => x.Email == request.Email && x.Id != id, cancellationToken);
+		if (emailIsExist)
+			return Result.Failure(UserErrors.DuplicatedEmail);
+
+		var allowRoles = await _roleService.GetAllAsync(cancellationToken: cancellationToken);
+
+		if (request.Roles.Except(allowRoles.Select(x => x.Name)).Any())
+			return Result.Failure(UserErrors.InvalidRoles);
+
+		if (await _userManager.FindByIdAsync(id) is not { } user)
+			return Result.Failure(UserErrors.UserNotFound);
+
+		user = request.Adapt(user);
+		var result = await _userManager.UpdateAsync(user);
+		if (result.Succeeded)
+		{
+			await _context.UserRoles
+				.Where(x=>x.UserId==id)
+				.ExecuteDeleteAsync(cancellationToken);
+
+			await _userManager.AddToRolesAsync(user, request.Roles);
+			return Result.Success();
+		}
+		else
+		{
+			var error = result.Errors.First();
+			return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+		}
+	}
 	public async Task<Result<UserProfileResponse>> GetProfileInfoAsync(string userId)
 	{
 		var user = await _userManager.Users
