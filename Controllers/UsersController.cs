@@ -40,4 +40,20 @@ public class UsersController(IUserService userService) : ControllerBase
 		return result.IsSuccess ? NoContent()
 			: result.ToProblem();
 	}
+
+	[HttpPut("{id}/toggle-status")]
+	[HasPermission(Permissions.UpdateUsers)]
+	public async Task<IActionResult> ToggleStatus([FromRoute] string id)
+	{
+		var result = await _userService.ToggleSatausAsync(id);
+		return result.IsSuccess ? NoContent() : result.ToProblem();
+	}
+
+	[HttpPut("{id}/unlock")]
+	[HasPermission(Permissions.UpdateUsers)]
+	public async Task<IActionResult> Unlock([FromRoute] string id)
+	{
+		var result = await _userService.UnlockAsync(id);
+		return result.IsSuccess ? NoContent() : result.ToProblem();
+	}
 }
