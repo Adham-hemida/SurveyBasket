@@ -12,4 +12,5 @@ public interface IUserService
 	Task<Result<UserResponse>> AddAsync(CreateUserRequest request, CancellationToken cancellationToken = default);
 	Task<Result> UpdateAsync(string id, UpdateUserRequest request, CancellationToken cancellationToken=default);
 	Task<Result> ToggleSatausAsync(string id);
+	Task<Result> UnlockAsync(string id);
 }
