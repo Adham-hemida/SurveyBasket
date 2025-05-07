@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using SurveyBasket.Contracts.Users;
 using System.Data;
 using System.Linq;
+using System.Threading;
 
 namespace SurveyBasket.Services;
 
@@ -15,33 +16,66 @@ public class UserService(UserManager<ApplicationUser> userManager,
 
 	public async Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
-		return await (from u in _context.Users
-					  join ur in _context.UserRoles
-					  on u.Id equals ur.UserId
-					  join r in _context.Roles
-					  on ur.RoleId equals r.Id into roles
-					  where !roles.Any(x => x.Name == DefaultRoles.Member)
-					  select new
-					  {
-						  u.Id,
-						  u.FirstName,
-						  u.LastName,
-						  u.Email,
-						  u.IsDisabled,
-						  Roles = roles.Select(x => x.Name!).ToList()
-					  }
-				)
-				.GroupBy(u => new { u.Id, u.FirstName, u.LastName, u.Email, u.IsDisabled })
-				.Select(u => new UserResponse
-				(
-					u.Key.Id,
-					u.Key.FirstName,
-					u.Key.LastName,
-					u.Key.Email,
-					u.Key.IsDisabled,
-					u.SelectMany(x => x.Roles)
-				))
-			   .ToListAsync(cancellationToken);
+	//	return await (from u in _context.Users
+	//				  join ur in _context.UserRoles
+	//				  on u.Id equals ur.UserId
+	//				  join r in _context.Roles
+	//				  on ur.RoleId equals r.Id into roles
+	//				  where !roles.Any(x => x.Name == DefaultRoles.Member)
+	//				  select new
+	//				  {
+	//					  u.Id,
+	//					  u.FirstName,
+	//					  u.LastName,
+	//					  u.Email,
+	//					  u.IsDisabled,
+	//					  Roles = roles.Select(x => x.Name!).ToList()
+	//				  }
+	//			)
+	//			.GroupBy(u => new { u.Id, u.FirstName, u.LastName, u.Email, u.IsDisabled })
+	//			.Select(u => new UserResponse
+	//			(
+	//				u.Key.Id,
+	//				u.Key.FirstName,
+	//				u.Key.LastName,
+	//				u.Key.Email,
+	//				u.Key.IsDisabled,
+	//				u.SelectMany(x => x.Roles)
+	//			))
+	//		   .ToListAsync(cancellationToken);
+	var usersWithMemberRole = await(
+	from ur in _context.UserRoles
+	join r in _context.Roles on ur.RoleId equals r.Id
+	where r.Name == DefaultRoles.Member
+	select ur.UserId
+).Distinct().ToListAsync(cancellationToken);
+
+	var result = await(
+		from u in _context.Users
+		where !usersWithMemberRole.Contains(u.Id)
+		join ur in _context.UserRoles on u.Id equals ur.UserId
+		join r in _context.Roles on ur.RoleId equals r.Id
+		select new
+		{
+			u.Id,
+			u.FirstName,
+			u.LastName,
+			u.Email,
+			u.IsDisabled,
+			RoleName = r.Name!
+		}
+	)
+	.GroupBy(x => new { x.Id, x.FirstName, x.LastName, x.Email, x.IsDisabled })
+	.Select(g => new UserResponse(
+		g.Key.Id,
+		g.Key.FirstName,
+		g.Key.LastName,
+		g.Key.Email,
+		g.Key.IsDisabled,
+		g.Select(x => x.RoleName)
+	))
+	.ToListAsync(cancellationToken);
+		return result;
 	}
 
 	public async Task<Result<UserResponse>> GetAsync(string id)
