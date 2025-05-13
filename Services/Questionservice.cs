@@ -2,7 +2,7 @@
 using SurveyBasket.Contracts.Answers;
 using SurveyBasket.Contracts.Common;
 using SurveyBasket.Contracts.Questions;
-using System.Collections.Generic;
+using System.Linq.Dynamic.Core;
 
 namespace SurveyBasket.Services;
 
@@ -19,9 +19,19 @@ public class Questionservice(ApplicationDbContext context,HybridCache hybridCach
 		if (!pollIsExists)
 			return Result.Failure<PaginatedList<QuestionResponse>>(PollErrors.PollNotFound);
 
-		var query =  _context.Questions
-			.Where(x => x.PollId == pollId)
-			.Include(x => x.Answers)
+		var query = _context.Questions
+			.Where(x => x.PollId == pollId);
+
+		if (!string.IsNullOrEmpty(filters.SearchValue))
+		{
+			query = query.Where(x => x.Content.Contains(filters.SearchValue));
+		}
+		if(!string.IsNullOrEmpty(filters.SortColumn))
+		{
+            query=query.OrderBy($"{filters.SortColumn} {filters.SortDirection}");
+		}
+		
+		var source=query.Include(x => x.Answers)
 			//.Select(q => new QuestionResponse(
 			//	q.Id,
 			//	q.Content,
@@ -30,7 +40,7 @@ public class Questionservice(ApplicationDbContext context,HybridCache hybridCach
 			.ProjectToType<QuestionResponse>()
 			.AsNoTracking();
 
-		var questions=await PaginatedList<QuestionResponse>.CreateAsync(query,filters.PageNumber,filters.PageSize,cancellationToken);
+		var questions=await PaginatedList<QuestionResponse>.CreateAsync(source,filters.PageNumber,filters.PageSize,cancellationToken);
 		return Result.Success(questions);
 
 	}
