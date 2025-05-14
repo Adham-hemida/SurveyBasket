@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SurveyBasket.Contracts.Common;
 using SurveyBasket.Contracts.Users;
 
 namespace SurveyBasket.Controllers;
@@ -11,9 +12,9 @@ public class UsersController(IUserService userService) : ControllerBase
 
 	[HttpGet("")]
 	[HasPermission(Permissions.GetUsers)]
-	public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+	public async Task<IActionResult> GetAll([FromQuery] RequestFilters filters, CancellationToken cancellationToken)
 	{
-	  return Ok(await _userService.GetAllAsync(cancellationToken));
+	  return Ok(await _userService.GetAllAsync(filters,cancellationToken));
 	}
 	
 	[HttpGet("{id}")]

@@ -1,9 +1,7 @@
-﻿
-using Microsoft.AspNetCore.Identity;
+﻿using SurveyBasket.Contracts.Common;
 using SurveyBasket.Contracts.Users;
+using System.Linq.Dynamic.Core;
 using System.Data;
-using System.Linq;
-using System.Threading;
 
 namespace SurveyBasket.Services;
 
@@ -16,8 +14,56 @@ public class UserService(UserManager<ApplicationUser> userManager,
 	private readonly ApplicationDbContext _context = context;
 
 
-	public async Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default)
+	public async Task<PaginatedList<UserResponse>> GetAllAsync(RequestFilters filters, CancellationToken cancellationToken = default)
 	{
+		var query = from u in _context.Users
+					join ur in _context.UserRoles on u.Id equals ur.UserId
+					join r in _context.Roles on ur.RoleId equals r.Id into roles
+					where !roles.Any(x => x.Name == DefaultRoles.Member)
+					select new
+					{
+						u.Id,
+						u.FirstName,
+						u.LastName,
+						u.Email,
+						u.IsDisabled,
+						Roles = roles.Select(x => x.Name).ToList()
+					};
+
+		// Apply filtering based on the search value
+		if (!string.IsNullOrEmpty(filters.SearchValue))
+		{
+			query = query.Where(u => u.FirstName.Contains(filters.SearchValue) || u.LastName.Contains(filters.SearchValue) || u.Email.Contains(filters.SearchValue));
+		}
+		if (!string.IsNullOrEmpty(filters.SortColumn))
+		{
+			query = query.OrderBy($"{filters.SortColumn} {filters.SortDirection}");
+		}
+		// تحويل الاستعلام إلى AsEnumerable لتطبيق العمليات في الذاكرة
+		var resultList = query.AsEnumerable()
+							  .GroupBy(u => new
+							  {
+								  u.Id,
+								  u.FirstName,
+								  u.LastName,
+								  u.Email,
+								  u.IsDisabled
+							  })
+							  .Select(u => new UserResponse
+							  (
+								  u.Key.Id,
+								  u.Key.FirstName,
+								  u.Key.LastName,
+								  u.Key.Email,
+								  u.Key.IsDisabled,
+								  u.SelectMany(x => x.Roles).ToList()
+							  ))
+							  .ToList();
+		return await PaginatedList<UserResponse>.Create1(
+			resultList,
+			filters.PageNumber,
+			filters.PageSize,cancellationToken
+			);
 		//	return await (from u in _context.Users
 		//				  join ur in _context.UserRoles
 		//				  on u.Id equals ur.UserId
@@ -45,39 +91,39 @@ public class UserService(UserManager<ApplicationUser> userManager,
 		//				u.SelectMany(x => x.Roles)
 		//			))
 		//		   .ToListAsync(cancellationToken);
-		var usersWithMemberRole = await (
-		from ur in _context.UserRoles
-		join r in _context.Roles on ur.RoleId equals r.Id
-		where r.Name == DefaultRoles.Member
-		select ur.UserId
-	).Distinct().ToListAsync(cancellationToken);
+	//	var usersWithMemberRole = await (
+	//	from ur in _context.UserRoles
+	//	join r in _context.Roles on ur.RoleId equals r.Id
+	//	where r.Name == DefaultRoles.Member
+	//	select ur.UserId
+	//).Distinct().ToListAsync(cancellationToken);
 
-		var result = await (
-			from u in _context.Users
-			where !usersWithMemberRole.Contains(u.Id)
-			join ur in _context.UserRoles on u.Id equals ur.UserId
-			join r in _context.Roles on ur.RoleId equals r.Id
-			select new
-			{
-				u.Id,
-				u.FirstName,
-				u.LastName,
-				u.Email,
-				u.IsDisabled,
-				RoleName = r.Name!
-			}
-		)
-		.GroupBy(x => new { x.Id, x.FirstName, x.LastName, x.Email, x.IsDisabled })
-		.Select(g => new UserResponse(
-			g.Key.Id,
-			g.Key.FirstName,
-			g.Key.LastName,
-			g.Key.Email,
-			g.Key.IsDisabled,
-			g.Select(x => x.RoleName)
-		))
-		.ToListAsync(cancellationToken);
-		return result;
+	//	var result = await (
+	//		from u in _context.Users
+	//		where !usersWithMemberRole.Contains(u.Id)
+	//		join ur in _context.UserRoles on u.Id equals ur.UserId
+	//		join r in _context.Roles on ur.RoleId equals r.Id
+	//		select new
+	//		{
+	//			u.Id,
+	//			u.FirstName,
+	//			u.LastName,
+	//			u.Email,
+	//			u.IsDisabled,
+	//			RoleName = r.Name!
+	//		}
+	//	)
+	//	.GroupBy(x => new { x.Id, x.FirstName, x.LastName, x.Email, x.IsDisabled })
+	//	.Select(g => new UserResponse(
+	//		g.Key.Id,
+	//		g.Key.FirstName,
+	//		g.Key.LastName,
+	//		g.Key.Email,
+	//		g.Key.IsDisabled,
+	//		g.Select(x => x.RoleName)
+	//	))
+	//	.ToListAsync(cancellationToken);
+	//	return result;
 	}
 
 	public async Task<Result<UserResponse>> GetAsync(string id)

@@ -23,4 +23,11 @@ public class PaginatedList<T>
 		var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 		return new PaginatedList<T>(items, pageNumber, count, pageSize);
 	}
+	public static async Task<PaginatedList<T>> Create1(IEnumerable<T> source, int pageNumber, int pageSize, CancellationToken cancellationToken)
+	{
+		var count = source.Count();
+		var items = source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+		return new PaginatedList<T>(items, pageNumber, count, pageSize);
+	}
+
 }
