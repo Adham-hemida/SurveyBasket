@@ -91,39 +91,7 @@ public class UserService(UserManager<ApplicationUser> userManager,
 		//				u.SelectMany(x => x.Roles)
 		//			))
 		//		   .ToListAsync(cancellationToken);
-	//	var usersWithMemberRole = await (
-	//	from ur in _context.UserRoles
-	//	join r in _context.Roles on ur.RoleId equals r.Id
-	//	where r.Name == DefaultRoles.Member
-	//	select ur.UserId
-	//).Distinct().ToListAsync(cancellationToken);
-
-	//	var result = await (
-	//		from u in _context.Users
-	//		where !usersWithMemberRole.Contains(u.Id)
-	//		join ur in _context.UserRoles on u.Id equals ur.UserId
-	//		join r in _context.Roles on ur.RoleId equals r.Id
-	//		select new
-	//		{
-	//			u.Id,
-	//			u.FirstName,
-	//			u.LastName,
-	//			u.Email,
-	//			u.IsDisabled,
-	//			RoleName = r.Name!
-	//		}
-	//	)
-	//	.GroupBy(x => new { x.Id, x.FirstName, x.LastName, x.Email, x.IsDisabled })
-	//	.Select(g => new UserResponse(
-	//		g.Key.Id,
-	//		g.Key.FirstName,
-	//		g.Key.LastName,
-	//		g.Key.Email,
-	//		g.Key.IsDisabled,
-	//		g.Select(x => x.RoleName)
-	//	))
-	//	.ToListAsync(cancellationToken);
-	//	return result;
+	
 	}
 
 	public async Task<Result<UserResponse>> GetAsync(string id)
