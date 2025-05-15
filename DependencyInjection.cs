@@ -53,6 +53,9 @@ public static class DependencyInjection
 
 		services.AddBackgroundJobsConfig(configuration);
 
+		services.AddHealthChecks()
+			.AddSqlServer(name: "database", connectionString: configuration.GetConnectionString("DefaultConnection")!);
+
 		services.AddOpenApi();
 		
 		services.AddHttpContextAccessor();
