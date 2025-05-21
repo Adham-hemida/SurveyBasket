@@ -65,7 +65,10 @@ public static class DependencyInjection
 
 		services.AddApiVersioning(options=>
 		{
-			options.ApiVersionReader = new UrlSegmentApiVersionReader();
+			options.DefaultApiVersion = new ApiVersion(1);
+			options.AssumeDefaultVersionWhenUnspecified = true;
+			options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+			options.ReportApiVersions = true;
 		})
 		.AddApiExplorer(options=>
 		{
