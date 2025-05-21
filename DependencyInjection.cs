@@ -68,8 +68,7 @@ public static class DependencyInjection
 			options.DefaultApiVersion = new ApiVersion(1);
 			options.AssumeDefaultVersionWhenUnspecified = true;
 			options.ReportApiVersions = true;
-			//options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
-			options.ApiVersionReader=new MediaTypeApiVersionReader("x-api-version");
+			options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
 		})
 		.AddApiExplorer(options=>
 		{
