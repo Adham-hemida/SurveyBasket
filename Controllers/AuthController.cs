@@ -69,7 +69,7 @@ public class AuthController(IAuthService authService,ILogger<AuthController> log
 	}
 
 	[HttpGet("test")]
-	[EnableRateLimiting("concurrency")]
+	[EnableRateLimiting("fixed")]
 	public IActionResult Test()
 	{
 		return Ok();
