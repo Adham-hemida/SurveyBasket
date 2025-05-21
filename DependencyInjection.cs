@@ -82,15 +82,22 @@ public static class DependencyInjection
 			//		options.AutoReplenishment = true;
 			//	});
 
-			rateLimitterOptions.AddFixedWindowLimiter("fixed",	options =>
-				{
-					options.PermitLimit = 10;
-					options.Window=TimeSpan.FromSeconds(20);
-					options.QueueLimit = 5;
-					options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			//rateLimitterOptions.AddFixedWindowLimiter("fixed",	options =>
+			//	{
+			//		options.PermitLimit = 10;
+			//		options.Window=TimeSpan.FromSeconds(20);
+			//		options.QueueLimit = 5;
+			//		options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			//	});
 
-
-				});
+			rateLimitterOptions.AddSlidingWindowLimiter("sliding", options =>
+			{
+				options.PermitLimit = 10;
+				options.Window = TimeSpan.FromSeconds(20);
+				options.SegmentsPerWindow = 3;
+				options.QueueLimit = 5;
+				options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			});
 		});
 
 		services.AddOpenApi();
