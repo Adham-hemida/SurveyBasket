@@ -69,7 +69,7 @@ public class AuthController(IAuthService authService,ILogger<AuthController> log
 	}
 
 	[HttpGet("test")]
-	[EnableRateLimiting("fixed")]
+	[EnableRateLimiting("sliding")]
 	public IActionResult Test()
 	{
 		return Ok();
