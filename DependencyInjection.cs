@@ -17,7 +17,7 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
 	{
-		var allowOrigins=configuration.GetSection("AllowOrigins").Get<string[]>();
+		var allowOrigins = configuration.GetSection("AllowOrigins").Get<string[]>();
 
 		services.AddCors(options =>
 		options.AddDefaultPolicy(bulider =>
@@ -46,8 +46,8 @@ public static class DependencyInjection
 		services.AddScoped<IUserService, UserService>();
 		services.AddScoped<IRoleService, RoleService>();
 		services.AddScoped<IEmailSender, EmailService>();
-		services.AddScoped<IQuestionService,Questionservice>();
-		services.AddScoped<IVoteService,VoteService>();
+		services.AddScoped<IQuestionService, Questionservice>();
+		services.AddScoped<IVoteService, VoteService>();
 		services.AddScoped<IResultService, ResultService>();
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -58,22 +58,43 @@ public static class DependencyInjection
 		services.AddHealthChecks()
 			.AddSqlServer(name: "database", connectionString: configuration.GetConnectionString("DefaultConnection")!)
 			.AddHangfire(options => { options.MinimumAvailableServers = 1; })
-			.AddCheck<MailProviderHealthCheck>(name:"mail service");
+			.AddCheck<MailProviderHealthCheck>(name: "mail service");
 
 		services.AddRateLimiter(rateLimitterOptions =>
 		{
-			rateLimitterOptions.RejectionStatusCode= StatusCodes.Status429TooManyRequests;
-			rateLimitterOptions.AddConcurrencyLimiter("concurrency",
-				options=>
+			rateLimitterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+			//rateLimitterOptions.AddConcurrencyLimiter("concurrency",
+			//	options=>
+			//	{
+			//		options.PermitLimit = 10;
+			//		options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			//		options.QueueLimit = 5;
+			//	});
+
+			//rateLimitterOptions.AddTokenBucketLimiter("token",
+			//	options =>
+			//	{
+			//		options.TokenLimit = 10;
+			//		options.QueueLimit = 5;
+			//		options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			//		options.TokensPerPeriod = 2;
+			//		options.ReplenishmentPeriod = TimeSpan.FromSeconds(5);
+			//		options.AutoReplenishment = true;
+			//	});
+
+			rateLimitterOptions.AddFixedWindowLimiter("fixed",	options =>
 				{
 					options.PermitLimit = 10;
-					options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+					options.Window=TimeSpan.FromSeconds(20);
 					options.QueueLimit = 5;
+					options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+
+
 				});
 		});
 
 		services.AddOpenApi();
-		
+
 		services.AddHttpContextAccessor();
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
@@ -106,17 +127,17 @@ public static class DependencyInjection
 			.AddEntityFrameworkStores<ApplicationDbContext>()
 			.AddDefaultTokenProviders();
 
-		services.AddTransient<IAuthorizationHandler,PermissionAuthorizationHandler>();
-		services.AddTransient<IAuthorizationPolicyProvider,PermissionAuthorizationPolicyProvider>();
+		services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+		services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
 		services.AddSingleton<IJwtProvider, JwtProvider>();
 
-	   // services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.sectionName));
-	   //add it because i Had Validation need to use 
-	   services.AddOptions<JwtOptions>()
-			.Bind(configuration.GetSection(JwtOptions.sectionName))
-			.ValidateDataAnnotations()
-			.ValidateOnStart();
+		// services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.sectionName));
+		//add it because i Had Validation need to use 
+		services.AddOptions<JwtOptions>()
+			 .Bind(configuration.GetSection(JwtOptions.sectionName))
+			 .ValidateDataAnnotations()
+			 .ValidateOnStart();
 		// to use it to get the name of attributes in JwtOptions class
 		var JwtSettings = configuration.GetSection(JwtOptions.sectionName).Get<JwtOptions>();
 
@@ -152,14 +173,14 @@ public static class DependencyInjection
 			);
 
 		return services;
-	}	
+	}
 	private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.AddHangfire(config => config
-	       .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-	       .UseSimpleAssemblyNameTypeSerializer()
-	       .UseRecommendedSerializerSettings()
-	       .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+		   .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+		   .UseSimpleAssemblyNameTypeSerializer()
+		   .UseRecommendedSerializerSettings()
+		   .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
 
 		services.AddHangfireServer();
 
