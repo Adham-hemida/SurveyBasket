@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.RateLimiting;
 
 namespace SurveyBasket.Controllers;
-[Route("[controller]")]
+[Route("[controller]/v{v:apiVersion}")]
 [ApiController]
 [EnableRateLimiting(RateLimiters.IpLimiter)]
 public class AuthController(IAuthService authService,ILogger<AuthController> logger) : ControllerBase
