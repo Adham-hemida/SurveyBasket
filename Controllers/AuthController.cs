@@ -3,6 +3,7 @@
 namespace SurveyBasket.Controllers;
 [Route("[controller]")]
 [ApiController]
+[EnableRateLimiting("ipLimit")]
 public class AuthController(IAuthService authService,ILogger<AuthController> logger) : ControllerBase
 {
 	private readonly IAuthService _authService = authService;
@@ -32,6 +33,7 @@ public class AuthController(IAuthService authService,ILogger<AuthController> log
 
 	}
 	[HttpPost("register")]
+	[DisableRateLimiting]
 	public async Task<IActionResult> Register([FromBody]RegisterRequest request, CancellationToken cancellationToken = default)
 	{
 		var result = await _authService.RegisterAsync(request, cancellationToken);
@@ -68,11 +70,6 @@ public class AuthController(IAuthService authService,ILogger<AuthController> log
 		return result.IsSuccess	? Ok(): result.ToProblem();
 	}
 
-	[HttpGet("test")]
-	[EnableRateLimiting("sliding")]
-	public IActionResult Test()
-	{
-		return Ok();
-	}
+
 
 }

@@ -63,6 +63,29 @@ public static class DependencyInjection
 		services.AddRateLimiter(rateLimitterOptions =>
 		{
 			rateLimitterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+			rateLimitterOptions.AddPolicy("ipLimit", httpContext =>
+			RateLimitPartition.GetFixedWindowLimiter(
+				partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+				factory: _ => new FixedWindowRateLimiterOptions
+				{
+					PermitLimit = 2,
+					Window = TimeSpan.FromSeconds(20)
+				}
+
+				));	
+			
+			rateLimitterOptions.AddPolicy("userLimit", httpContext =>
+			RateLimitPartition.GetFixedWindowLimiter(
+				partitionKey: httpContext.User.GetUserId(),
+				factory: _ => new FixedWindowRateLimiterOptions
+				{
+					PermitLimit = 2,
+					Window = TimeSpan.FromSeconds(20)
+				}
+
+				));
+
 			//rateLimitterOptions.AddConcurrencyLimiter("concurrency",
 			//	options=>
 			//	{
@@ -90,14 +113,14 @@ public static class DependencyInjection
 			//		options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
 			//	});
 
-			rateLimitterOptions.AddSlidingWindowLimiter("sliding", options =>
-			{
-				options.PermitLimit = 10;
-				options.Window = TimeSpan.FromSeconds(20);
-				options.SegmentsPerWindow = 3;
-				options.QueueLimit = 5;
-				options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-			});
+			//rateLimitterOptions.AddSlidingWindowLimiter("sliding", options =>
+			//{
+			//	options.PermitLimit = 10;
+			//	options.Window = TimeSpan.FromSeconds(20);
+			//	options.SegmentsPerWindow = 3;
+			//	options.QueueLimit = 5;
+			//	options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+			//});
 		});
 
 		services.AddOpenApi();
