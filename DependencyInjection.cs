@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Authentication;
 using SurveyBasket.Health;
+using SurveyBasket.OpenApiTransformers;
 using SurveyBasket.Settings;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -81,17 +82,7 @@ public static class DependencyInjection
 			.AddEndpointsApiExplorer()
 			.AddOpenApi(options=>
 			{
-				options.AddDocumentTransformer((document,context,cancellationToken) =>
-				{
-					document.Info = new()
-					{
-						Title = "Survey Basket API",
-						Version = "v1",
-						Description = "Api For Processing"
-
-					};
-					return Task.CompletedTask;
-				});
+				options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
 			});
 
 		services.AddHttpContextAccessor();
