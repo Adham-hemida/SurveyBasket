@@ -4,6 +4,7 @@ using Serilog;
 using SurveyBasket;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.UI.Client;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -17,7 +18,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
 	app.MapOpenApi();
-//	app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
+	app.MapScalarApiReference();
+	//	app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
 }
 
 app.UseSerilogRequestLogging();

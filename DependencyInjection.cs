@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using MapsterMapper;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using SurveyBasket.Authentication;
 using SurveyBasket.Health;
+using SurveyBasket.OpenApiTransformers;
 using SurveyBasket.Settings;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -63,14 +65,14 @@ public static class DependencyInjection
 			.AddHangfire(options => { options.MinimumAvailableServers = 1; })
 			.AddCheck<MailProviderHealthCheck>(name: "mail service");
 
-		services.AddApiVersioning(options=>
+		services.AddApiVersioning(options =>
 		{
 			options.DefaultApiVersion = new ApiVersion(1);
 			options.AssumeDefaultVersionWhenUnspecified = true;
 			options.ReportApiVersions = true;
 			options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
 		})
-		.AddApiExplorer(options=>
+		.AddApiExplorer(options =>
 		{
 			options.GroupNameFormat = "'v'V";
 			options.SubstituteApiVersionInUrl = true;
@@ -79,26 +81,33 @@ public static class DependencyInjection
 
 		services
 			.AddEndpointsApiExplorer()
-			.AddOpenApi(options=>
-			{
-				options.AddDocumentTransformer((document,context,cancellationToken) =>
-				{
-					document.Info = new()
-					{
-						Title = "Survey Basket API",
-						Version = "v1",
-						Description = "Api For Processing"
-
-					};
-					return Task.CompletedTask;
-				});
-			});
+			.AddOpenApiServices();
 
 		services.AddHttpContextAccessor();
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
 		return services;
 	}
+
+	private static IServiceCollection AddOpenApiServices(this IServiceCollection services)
+	{
+		var serviceProvider = services.BuildServiceProvider();
+		var apiVersionDescriptionProvider = serviceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
+		foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+		{
+			services.AddOpenApi(description.GroupName, options =>
+			 {
+				 options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+				 options.AddDocumentTransformer(new ApiVersioningTransformer(description));
+
+			 });
+		};
+
+
+		return services;
+	}
+
+
 	private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
 	{
 
@@ -110,6 +119,8 @@ public static class DependencyInjection
 
 		return services;
 	}
+
+
 	private static IServiceCollection AddFluentValidationConfig(this IServiceCollection services)
 	{
 		services
