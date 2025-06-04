@@ -79,7 +79,20 @@ public static class DependencyInjection
 
 		services
 			.AddEndpointsApiExplorer()
-			.AddOpenApi();
+			.AddOpenApi(options=>
+			{
+				options.AddDocumentTransformer((document,context,cancellationToken) =>
+				{
+					document.Info = new()
+					{
+						Title = "Survey Basket API",
+						Version = "v1",
+						Description = "Api For Processing"
+
+					};
+					return Task.CompletedTask;
+				});
+			});
 
 		services.AddHttpContextAccessor();
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
