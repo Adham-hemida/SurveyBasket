@@ -77,7 +77,9 @@ public static class DependencyInjection
 		});
 
 
-		services.AddOpenApi();
+		services
+			.AddEndpointsApiExplorer()
+			.AddOpenApi();
 
 		services.AddHttpContextAccessor();
 		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
