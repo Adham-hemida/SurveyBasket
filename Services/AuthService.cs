@@ -197,7 +197,7 @@ public class AuthService(
 			return Result.Success();
 
 		if (!user.EmailConfirmed)
-			return Result.Failure(UserErrors.EmailNotConfirmed);
+			return Result.Failure(UserErrors.EmailNotConfirmed with { statusCode=StatusCodes.Status400BadRequest});
 
 		var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
