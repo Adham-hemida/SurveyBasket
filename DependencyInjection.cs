@@ -84,7 +84,11 @@ public static class DependencyInjection
 			.AddOpenApiServices();
 
 		services.AddHttpContextAccessor();
-		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+
+		services.AddOptions<MailSettings>()
+			.BindConfiguration(nameof(MailSettings))
+			.ValidateDataAnnotations()
+			.ValidateOnStart();
 
 		return services;
 	}
