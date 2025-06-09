@@ -73,10 +73,7 @@ public class PollService(ApplicationDbContext context) : IPollService
 		if (isExisting)
 			return Result.Failure(PollErrors.DuplicatedPollTitle);
 
-		currentPoll.Title = request.Title;
-		currentPoll.Summary = request.Summary;
-		currentPoll.StartsAt = request.StartsAt;
-		currentPoll.EndsAt = request.EndsAt;
+		currentPoll = request.Adapt(currentPoll);
 
 		await _context.SaveChangesAsync(cancellationToken);
 

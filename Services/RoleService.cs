@@ -11,10 +11,10 @@ public class RoleService(
 	private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
 	private readonly ApplicationDbContext _context = context;
 
-	public async Task<IEnumerable<RoleResponse>> GetAllAsync(bool? includeDisabled=false,CancellationToken cancellationToken=default)
+	public async Task<IEnumerable<RoleResponse>> GetAllAsync(bool includeDisabled=false,CancellationToken cancellationToken=default)
 	{
 		return await _roleManager.Roles
-			.Where(x=>!x.IsDefault&&( !x.IsDeleted || includeDisabled == true))
+			.Where(x=>!x.IsDefault&&( !x.IsDeleted || includeDisabled))
 			.Select(x => new RoleResponse
 			(x.Id,
 			x.Name!,
