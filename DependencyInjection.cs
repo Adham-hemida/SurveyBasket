@@ -61,7 +61,7 @@ public static class DependencyInjection
 		services.AddBackgroundJobsConfig(configuration);
 
 		services.AddHealthChecks()
-			.AddSqlServer(name: "database", connectionString: configuration.GetConnectionString("DefaultConnection")!)
+			.AddSqlServer(name: "database", connectionString: connectionString!)
 			.AddHangfire(options => { options.MinimumAvailableServers = 1; })
 			.AddCheck<MailProviderHealthCheck>(name: "mail service");
 
