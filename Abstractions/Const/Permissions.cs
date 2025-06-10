@@ -4,14 +4,14 @@ public static class Permissions
 {
 	public static string Type { get; } = "permissions";
 
-	public const string GetPolls= "polls:read";
-	public const string AddPolls= "polls:add";
-	public const string UpdatePolls= "polls:update";
-	public const string DeletePolls= "polls:delete";
+	public const string GetPolls = "polls:read";
+	public const string AddPolls = "polls:add";
+	public const string UpdatePolls = "polls:update";
+	public const string DeletePolls = "polls:delete";
 
-	public const string GetQuestions= "questions:read";
-	public const string AddQuestions= "questions:add";
-	public const string updateQuestions= "questions:update";
+	public const string GetQuestions = "questions:read";
+	public const string AddQuestions = "questions:add";
+	public const string updateQuestions = "questions:update";
 
 	public const string GetUsers = "users:read";
 	public const string AddUsers = "users:add";

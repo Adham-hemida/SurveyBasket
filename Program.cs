@@ -1,10 +1,10 @@
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Scalar.AspNetCore;
 using Serilog;
 using SurveyBasket;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using HealthChecks.UI.Client;
-using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDependencies(builder.Configuration);
@@ -28,7 +28,7 @@ app.UseHangfireDashboard("/jobs", new DashboardOptions
 {
 	Authorization =
 	[
-       new HangfireCustomBasicAuthenticationFilter
+	   new HangfireCustomBasicAuthenticationFilter
 	   {
 		   User = app.Configuration.GetValue<string>("HangfireSettings:Username"),
 		   Pass = app.Configuration.GetValue<string>("HangfireSettings:Password")
@@ -41,8 +41,8 @@ app.UseAuthorization();
 app.MapControllers();
 app.UseExceptionHandler();
 app.UseRateLimiter();
-app.MapHealthChecks("health",new HealthCheckOptions
+app.MapHealthChecks("health", new HealthCheckOptions
 {
-	ResponseWriter=UIResponseWriter.WriteHealthCheckUIResponse
+	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
 app.Run();

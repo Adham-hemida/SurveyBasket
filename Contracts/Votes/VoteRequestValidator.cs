@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Contracts.Votes;
 
-public class VoteRequestValidator:AbstractValidator<VoteRequest>
+public class VoteRequestValidator : AbstractValidator<VoteRequest>
 {
 	public VoteRequestValidator()
 	{
@@ -8,7 +8,7 @@ public class VoteRequestValidator:AbstractValidator<VoteRequest>
 			.NotEmpty();
 
 		RuleForEach(x => x.Answers)
-			.SetInheritanceValidator(v=>v.Add(
+			.SetInheritanceValidator(v => v.Add(
 				new VoteAnswerRequestValidator()
 				));
 	}

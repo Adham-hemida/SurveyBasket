@@ -15,10 +15,10 @@ public class MappingConfiguarations : IRegister
 
 
 		config.NewConfig<QuestionRequest, Question>()
-			.Map(dest => dest.Answers,src=>src.Answers.Select(answer=>new Answer{Content=answer}));
+			.Map(dest => dest.Answers, src => src.Answers.Select(answer => new Answer { Content = answer }));
 
 		config.NewConfig<RegisterRequest, ApplicationUser>()
-			.Map(dest => dest.UserName,src=>src.Email);
+			.Map(dest => dest.UserName, src => src.Email);
 
 		config.NewConfig<(ApplicationUser user, IList<string> roles), UserResponse>()
 			.Map(dest => dest, src => src.user)
@@ -26,10 +26,10 @@ public class MappingConfiguarations : IRegister
 
 		config.NewConfig<CreateUserRequest, ApplicationUser>()
 		.Map(dest => dest.UserName, src => src.Email)
-		.Map(dest=>dest.EmailConfirmed,src=>true);
-		
+		.Map(dest => dest.EmailConfirmed, src => true);
+
 		config.NewConfig<UpdateUserRequest, ApplicationUser>()
 		.Map(dest => dest.UserName, src => src.Email)
-		.Map(dest=>dest.NormalizedUserName,src=>src.Email.ToUpper());
+		.Map(dest => dest.NormalizedUserName, src => src.Email.ToUpper());
 	}
 }

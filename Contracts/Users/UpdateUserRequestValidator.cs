@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Contracts.Users;
 
-public class UpdateUserRequestValidator:AbstractValidator<UpdateUserRequest>
+public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
 {
 	public UpdateUserRequestValidator()
 	{

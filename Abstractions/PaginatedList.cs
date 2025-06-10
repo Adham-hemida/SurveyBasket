@@ -2,7 +2,7 @@
 
 public class PaginatedList<T>
 {
-	public PaginatedList(List<T> items,int pageNumber,int count,int pageSize)
+	public PaginatedList(List<T> items, int pageNumber, int count, int pageSize)
 	{
 		Items = items;
 		PageNumber = pageNumber;
@@ -17,7 +17,7 @@ public class PaginatedList<T>
 
 
 
-	public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize,CancellationToken cancellationToken)
+	public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize, CancellationToken cancellationToken)
 	{
 		var count = await source.CountAsync(cancellationToken);
 		var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);

@@ -6,20 +6,21 @@ using SurveyBasket.Settings;
 
 namespace SurveyBasket.Services;
 
-public class EmailService(IOptions<MailSettings> mailSettings,ILogger<EmailService> logger) : IEmailSender
+public class EmailService(IOptions<MailSettings> mailSettings, ILogger<EmailService> logger) : IEmailSender
 {
 	private readonly MailSettings _mailSettings = mailSettings.Value;
 	private readonly ILogger<EmailService> _logger = logger;
 
 	public async Task SendEmailAsync(string email, string subject, string htmlMessage)
 	{
-		var message= new MimeMessage{
-			Sender=MailboxAddress.Parse(_mailSettings.Mail),
-			Subject=subject
+		var message = new MimeMessage
+		{
+			Sender = MailboxAddress.Parse(_mailSettings.Mail),
+			Subject = subject
 
 		};
 		message.To.Add(MailboxAddress.Parse(email));
-		var builder=new BodyBuilder
+		var builder = new BodyBuilder
 		{
 			HtmlBody = htmlMessage
 		};
