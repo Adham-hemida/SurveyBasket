@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Persistence.EntitiesConfiguration;
 
-public class RoleConfiguration:IEntityTypeConfiguration<ApplicationRole>
+public class RoleConfiguration : IEntityTypeConfiguration<ApplicationRole>
 {
 	public void Configure(EntityTypeBuilder<ApplicationRole> builder)
 	{
@@ -10,7 +10,7 @@ public class RoleConfiguration:IEntityTypeConfiguration<ApplicationRole>
 				Id = DefaultRoles.AdminRoleId,
 				Name = DefaultRoles.Admin,
 				NormalizedName = DefaultRoles.Admin.ToUpper(),
-	            ConcurrencyStamp = DefaultRoles.AdminRoleConcurrencyStamp,
+				ConcurrencyStamp = DefaultRoles.AdminRoleConcurrencyStamp,
 			},
 			new ApplicationRole{
 				Id = DefaultRoles.MemberRoleId,

@@ -61,7 +61,7 @@ public static class DependencyInjection
 		services.AddBackgroundJobsConfig(configuration);
 
 		services.AddHealthChecks()
-			.AddSqlServer(name: "database", connectionString: configuration.GetConnectionString("DefaultConnection")!)
+			.AddSqlServer(name: "database", connectionString: connectionString!)
 			.AddHangfire(options => { options.MinimumAvailableServers = 1; })
 			.AddCheck<MailProviderHealthCheck>(name: "mail service");
 
@@ -84,7 +84,11 @@ public static class DependencyInjection
 			.AddOpenApiServices();
 
 		services.AddHttpContextAccessor();
-		services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+
+		services.AddOptions<MailSettings>()
+			.BindConfiguration(nameof(MailSettings))
+			.ValidateDataAnnotations()
+			.ValidateOnStart();
 
 		return services;
 	}

@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Abstractions.Const;
-
-namespace SurveyBasket.Contracts.Users;
+﻿namespace SurveyBasket.Contracts.Users;
 
 public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
 {
@@ -11,9 +9,9 @@ public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRe
 
 		RuleFor(x => x.NewPassword)
 			.NotEmpty()
-		    .Matches(RegexPatterns.Password)
+			.Matches(RegexPatterns.Password)
 			.WithMessage("Password should be at least 8 digits and should contains Lowercase, NonAlphanumeric and Uppercase")
-            .NotEqual(x=>x.CurrentPassword)
+			.NotEqual(x => x.CurrentPassword)
 			.WithMessage("New password should not be same as current password");
 	}
 

@@ -11,10 +11,10 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
 	private readonly JwtOptions _options = options.Value;
 
-	public (string token, int expiresIn)GenerateJwtToken(ApplicationUser user,IEnumerable<string> roles,IEnumerable<string> permissions)
+	public (string token, int expiresIn) GenerateJwtToken(ApplicationUser user, IEnumerable<string> roles, IEnumerable<string> permissions)
 	{
-		Claim[] claims= [
-	        new(JwtRegisteredClaimNames.Sub,user.Id),
+		Claim[] claims = [
+			new(JwtRegisteredClaimNames.Sub,user.Id),
 			new(JwtRegisteredClaimNames.Email,user.Email!),
 			new(JwtRegisteredClaimNames.GivenName,user.FirstName),
 			new(JwtRegisteredClaimNames.FamilyName,user.LastName),
@@ -22,7 +22,7 @@ public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 			new(nameof(roles),JsonSerializer.Serialize(roles),JsonClaimValueTypes.JsonArray),
 			new(nameof(permissions),JsonSerializer.Serialize(permissions),JsonClaimValueTypes.JsonArray)
 		];
-		
+
 		var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
 		var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 

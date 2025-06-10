@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SurveyBasket.Contracts.Common;
+﻿using SurveyBasket.Contracts.Common;
 using SurveyBasket.Contracts.Users;
 
 namespace SurveyBasket.Controllers;
@@ -14,9 +12,9 @@ public class UsersController(IUserService userService) : ControllerBase
 	[HasPermission(Permissions.GetUsers)]
 	public async Task<IActionResult> GetAll([FromQuery] RequestFilters filters, CancellationToken cancellationToken)
 	{
-	  return Ok(await _userService.GetAllAsync(filters,cancellationToken));
+		return Ok(await _userService.GetAllAsync(filters, cancellationToken));
 	}
-	
+
 	[HttpGet("{id}")]
 	[HasPermission(Permissions.GetUsers)]
 	public async Task<IActionResult> Get([FromRoute] string id)
@@ -24,10 +22,10 @@ public class UsersController(IUserService userService) : ControllerBase
 		var result = await _userService.GetAsync(id);
 		return result.IsSuccess ? Ok(result.Value)
 			: result.ToProblem();
-	}	
+	}
 	[HttpPost("")]
 	[HasPermission(Permissions.AddUsers)]
-	public async Task<IActionResult> Add([FromBody] CreateUserRequest request,CancellationToken cancellationToken)
+	public async Task<IActionResult> Add([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
 	{
 		var result = await _userService.AddAsync(request, cancellationToken);
 		return result.IsSuccess ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value)
@@ -35,9 +33,9 @@ public class UsersController(IUserService userService) : ControllerBase
 	}
 	[HttpPut("{id}")]
 	[HasPermission(Permissions.UpdateUsers)]
-	public async Task<IActionResult> Update([FromRoute]string id,[FromBody] UpdateUserRequest request,CancellationToken cancellationToken)
+	public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
 	{
-		var result = await _userService.UpdateAsync(id,request, cancellationToken);
+		var result = await _userService.UpdateAsync(id, request, cancellationToken);
 		return result.IsSuccess ? NoContent()
 			: result.ToProblem();
 	}

@@ -10,9 +10,9 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
 
 	[HttpGet("")]
 	[HasPermission(Permissions.GetQuestions)]
-	public async Task<IActionResult> GetAll([FromRoute] int pollId, [FromQuery] RequestFilters filters,CancellationToken cancellationToken)
+	public async Task<IActionResult> GetAll([FromRoute] int pollId, [FromQuery] RequestFilters filters, CancellationToken cancellationToken)
 	{
-		var result = await _questionService.GetAllAsync(pollId, filters,cancellationToken);
+		var result = await _questionService.GetAllAsync(pollId, filters, cancellationToken);
 		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 	}
 	[HttpGet("{id}")]
@@ -48,6 +48,6 @@ public class QuestionsController(IQuestionService questionService) : ControllerB
 	{
 		var result = await _questionService.ToggleSatausAsync(pollId, id, cancellationToken);
 
-		return result.IsSuccess	? NoContent(): result.ToProblem();
+		return result.IsSuccess ? NoContent() : result.ToProblem();
 	}
 }

@@ -1,5 +1,4 @@
 ﻿using Hangfire;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using SurveyBasket.Authentication;
@@ -26,7 +25,7 @@ public class AuthService(
 	private readonly IEmailSender _emailSender = emailSender;
 	private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 	private readonly ApplicationDbContext _context = context;
-	private readonly int _refreshTokenExpirationDays=14;
+	private readonly int _refreshTokenExpirationDays = 14;
 
 	public async Task<Result<AuthResponse>> GetTokenAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default)
 	{
@@ -39,7 +38,7 @@ public class AuthService(
 
 		var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, true);
 		if (result.Succeeded)
-		   {
+		{
 			var (userRoles, userPermissions) = await GetUserRolesPermissions(user, cancellationToken);
 			var (token, expiresIn) = _jwtProvider.GenerateJwtToken(user, userRoles, userPermissions);
 
@@ -55,7 +54,7 @@ public class AuthService(
 			await _userManager.UpdateAsync(user);
 			var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration);
 			return Result.Success(response);
-		  }
+		}
 
 		var error = result.IsNotAllowed
 			? UserErrors.EmailNotConfirmed
@@ -76,7 +75,7 @@ public class AuthService(
 		if (user is null)
 			return Result.Failure<AuthResponse>(UserErrors.InvalidJwtTokens);
 
-		if(user.IsDisabled)
+		if (user.IsDisabled)
 			return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
 
 		if (user.LockoutEnd > DateTime.UtcNow)
@@ -88,8 +87,8 @@ public class AuthService(
 
 		userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-		var(userRoles, userPermissions) = await GetUserRolesPermissions(user, cancellationToken);
-		var (newToken, expiresIn) = _jwtProvider.GenerateJwtToken(user,userRoles, userPermissions);
+		var (userRoles, userPermissions) = await GetUserRolesPermissions(user, cancellationToken);
+		var (newToken, expiresIn) = _jwtProvider.GenerateJwtToken(user, userRoles, userPermissions);
 		var newRefreshToken = GenerateRefreshToken();
 		var newRefreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpirationDays);
 
@@ -99,20 +98,20 @@ public class AuthService(
 			ExpiresOn = newRefreshTokenExpiration
 		});
 		await _userManager.UpdateAsync(user);
-			var result=new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn,newRefreshToken, newRefreshTokenExpiration);
+		var result = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn, newRefreshToken, newRefreshTokenExpiration);
 		return Result.Success(result);
 
 	}
 	public async Task<Result> RevokeRefreshTokenAsync(RefreshTokenRequest refreshTokenRequest, CancellationToken cancellationToken = default)
 	{
 		var userId = _jwtProvider.ValidateToken(refreshTokenRequest.token);
-		if(userId is null)
+		if (userId is null)
 			return Result.Failure(UserErrors.InvalidRefreshToken);
-		var user=await _userManager.FindByIdAsync(userId);
-		if(user is null)
+		var user = await _userManager.FindByIdAsync(userId);
+		if (user is null)
 			return Result.Failure(UserErrors.InvalidRefreshToken);
-		var userRefreshToken =user.RefreshTokens.SingleOrDefault(x => x.Token == refreshTokenRequest.refreshToken && x.IsActive);	
-		if(userRefreshToken is null)
+		var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshTokenRequest.refreshToken && x.IsActive);
+		if (userRefreshToken is null)
 			return Result.Failure(UserErrors.InvalidRefreshToken);
 		userRefreshToken.RevokedOn = DateTime.UtcNow;
 		await _userManager.UpdateAsync(user);
@@ -129,7 +128,7 @@ public class AuthService(
 		if (result.Succeeded)
 		{
 			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-			code= WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+			code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 			_logger.LogInformation("Confirmation code: {code}", code);
 
 			//TODO: Send email with the confirmation link
@@ -144,10 +143,10 @@ public class AuthService(
 	}
 	public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request)
 	{
-		if(await _userManager.FindByIdAsync(request.UserId) is not { } user)
+		if (await _userManager.FindByIdAsync(request.UserId) is not { } user)
 			return Result.Failure(UserErrors.InvalidCode);
 
-		if(user.EmailConfirmed)
+		if (user.EmailConfirmed)
 			return Result.Failure(UserErrors.DuplicatedConfirmation);
 
 		var code = request.Code;
@@ -155,14 +154,14 @@ public class AuthService(
 		{
 			code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
 		}
-		catch(FormatException)
+		catch (FormatException)
 		{
 			return Result.Failure(UserErrors.InvalidCode);
 		}
-		var result= await _userManager.ConfirmEmailAsync(user, code);
+		var result = await _userManager.ConfirmEmailAsync(user, code);
 
 		if (result.Succeeded)
-		{ 
+		{
 			await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
 			return Result.Success();
 		}
@@ -171,7 +170,7 @@ public class AuthService(
 			var error = result.Errors.First();
 			return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
 		}
-		
+
 	}
 	public async Task<Result> ResendConfirmEmailAsync(ResendConfirmEmailRequest request)
 	{
@@ -186,7 +185,7 @@ public class AuthService(
 		_logger.LogInformation("Confirmation code: {code}", code);
 
 		//TODO: Send email with the confirmation link
-		await SendConfirmationEmail(user,code);
+		await SendConfirmationEmail(user, code);
 		return Result.Success();
 
 	}
@@ -197,7 +196,7 @@ public class AuthService(
 			return Result.Success();
 
 		if (!user.EmailConfirmed)
-			return Result.Failure(UserErrors.EmailNotConfirmed);
+			return Result.Failure(UserErrors.EmailNotConfirmed with { statusCode = StatusCodes.Status400BadRequest });
 
 		var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 		code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -252,7 +251,7 @@ public class AuthService(
 			}
 		);
 
-		BackgroundJob.Enqueue(()=> _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket: Email Confirmation", emailBody));
+		BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket: Email Confirmation", emailBody));
 		await Task.CompletedTask;
 	}
 
@@ -268,15 +267,15 @@ public class AuthService(
 			}
 		);
 
-		BackgroundJob.Enqueue(()=> _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket: Change Password", emailBody));
+		BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "✅ Survey Basket: Change Password", emailBody));
 		await Task.CompletedTask;
 	}
 
-	private async Task<(IEnumerable<string>roles,IEnumerable<string>permissions)>GetUserRolesPermissions(ApplicationUser user,CancellationToken cancellationToken)
+	private async Task<(IEnumerable<string> roles, IEnumerable<string> permissions)> GetUserRolesPermissions(ApplicationUser user, CancellationToken cancellationToken)
 	{
-		var userRoles=await _userManager.GetRolesAsync(user);
+		var userRoles = await _userManager.GetRolesAsync(user);
 
-		var userPermissions=await (
+		var userPermissions = await (
 			from r in _context.Roles
 			join p in _context.RoleClaims
 			on r.Id equals p.RoleId
@@ -285,6 +284,6 @@ public class AuthService(
 			.Distinct()
 			.ToListAsync(cancellationToken);
 
-		return (userRoles,userPermissions);
+		return (userRoles, userPermissions);
 	}
 }

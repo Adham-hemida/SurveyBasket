@@ -6,7 +6,7 @@ namespace SurveyBasket.OpenApiTransformers;
 
 public sealed class ApiVersioningTransformer(ApiVersionDescription description) : IOpenApiDocumentTransformer
 {
-	public ApiVersionDescription Description{ get; }=description;
+	public ApiVersionDescription Description { get; } = description;
 
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{

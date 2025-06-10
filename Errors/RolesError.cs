@@ -1,8 +1,8 @@
 ﻿namespace SurveyBasket.Errors;
 
-public  static class RolesError
+public static class RolesError
 {
-	public static readonly  Error RoleNotFound =
+	public static readonly Error RoleNotFound =
 		new("Role.Notfound", "Role not found", StatusCodes.Status404NotFound);
 
 	public static readonly Error RoleDuplicated =

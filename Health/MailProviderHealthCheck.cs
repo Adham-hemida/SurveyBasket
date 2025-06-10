@@ -15,12 +15,12 @@ public class MailProviderHealthCheck(IOptions<MailSettings> mailSettings) : IHea
 			using var smtp = new SmtpClient();
 			smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls, cancellationToken);
 			smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password, cancellationToken);
-			
+
 			return Task.FromResult(HealthCheckResult.Healthy());
 		}
 		catch (Exception ex)
 		{
-			return Task.FromResult(HealthCheckResult.Unhealthy(exception:ex));
+			return Task.FromResult(HealthCheckResult.Unhealthy(exception: ex));
 		}
 	}
 }

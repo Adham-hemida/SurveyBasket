@@ -1,7 +1,7 @@
 ﻿using SurveyBasket.Contracts.Common;
 using SurveyBasket.Contracts.Users;
-using System.Linq.Dynamic.Core;
 using System.Data;
+using System.Linq.Dynamic.Core;
 
 namespace SurveyBasket.Services;
 
@@ -62,7 +62,7 @@ public class UserService(UserManager<ApplicationUser> userManager,
 		return await PaginatedList<UserResponse>.Create1(
 			resultList,
 			filters.PageNumber,
-			filters.PageSize,cancellationToken
+			filters.PageSize, cancellationToken
 			);
 		//	return await (from u in _context.Users
 		//				  join ur in _context.UserRoles
@@ -91,7 +91,7 @@ public class UserService(UserManager<ApplicationUser> userManager,
 		//				u.SelectMany(x => x.Roles)
 		//			))
 		//		   .ToListAsync(cancellationToken);
-	
+
 	}
 
 	public async Task<Result<UserResponse>> GetAsync(string id)

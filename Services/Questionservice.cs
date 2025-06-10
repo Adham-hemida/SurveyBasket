@@ -6,14 +6,14 @@ using System.Linq.Dynamic.Core;
 
 namespace SurveyBasket.Services;
 
-public class Questionservice(ApplicationDbContext context,HybridCache hybridCache,ILogger<Questionservice> logger) : IQuestionService
+public class Questionservice(ApplicationDbContext context, HybridCache hybridCache, ILogger<Questionservice> logger) : IQuestionService
 {
 	private readonly ApplicationDbContext _context = context;
 	private readonly HybridCache _hybridCache = hybridCache;
 	private readonly ILogger<Questionservice> _logger = logger;
 	private const string _cachePrefix = "availbleQuestions";
 
-	public async Task<Result<PaginatedList<QuestionResponse>>> GetAllAsync(int pollId,RequestFilters filters, CancellationToken cancellationToken=default)
+	public async Task<Result<PaginatedList<QuestionResponse>>> GetAllAsync(int pollId, RequestFilters filters, CancellationToken cancellationToken = default)
 	{
 		var pollIsExists = await _context.Polls.AnyAsync(x => x.Id == pollId, cancellationToken);
 		if (!pollIsExists)
@@ -26,12 +26,12 @@ public class Questionservice(ApplicationDbContext context,HybridCache hybridCach
 		{
 			query = query.Where(x => x.Content.Contains(filters.SearchValue));
 		}
-		if(!string.IsNullOrEmpty(filters.SortColumn))
+		if (!string.IsNullOrEmpty(filters.SortColumn))
 		{
-            query=query.OrderBy($"{filters.SortColumn} {filters.SortDirection}");
+			query = query.OrderBy($"{filters.SortColumn} {filters.SortDirection}");
 		}
-		
-		var source=query.Include(x => x.Answers)
+
+		var source = query.Include(x => x.Answers)
 			//.Select(q => new QuestionResponse(
 			//	q.Id,
 			//	q.Content,
@@ -40,7 +40,7 @@ public class Questionservice(ApplicationDbContext context,HybridCache hybridCach
 			.ProjectToType<QuestionResponse>()
 			.AsNoTracking();
 
-		var questions=await PaginatedList<QuestionResponse>.CreateAsync(source,filters.PageNumber,filters.PageSize,cancellationToken);
+		var questions = await PaginatedList<QuestionResponse>.CreateAsync(source, filters.PageNumber, filters.PageSize, cancellationToken);
 		return Result.Success(questions);
 
 	}
@@ -50,13 +50,13 @@ public class Questionservice(ApplicationDbContext context,HybridCache hybridCach
 		if (hasVote)
 			return Result.Failure<IEnumerable<QuestionResponse>>(VoteErrors.DuplicatedVote);
 
-		var pollIsExsist = await _context.Polls.AnyAsync(x => x.Id == pollId && x.IsPublished && x.StartsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && x.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow),cancellationToken);
+		var pollIsExsist = await _context.Polls.AnyAsync(x => x.Id == pollId && x.IsPublished && x.StartsAt <= DateOnly.FromDateTime(DateTime.UtcNow) && x.EndsAt >= DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
 		if (!pollIsExsist)
 			return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
 
 		var cacheKey = $"{_cachePrefix}-{pollId}";
 		var questions = await _hybridCache.GetOrCreateAsync<IEnumerable<QuestionResponse>>(cacheKey,
-			async cacheEntry=>
+			async cacheEntry =>
 			{
 				return await _context.Questions
 			.Where(x => x.IsActive && x.PollId == pollId)
@@ -69,9 +69,9 @@ public class Questionservice(ApplicationDbContext context,HybridCache hybridCach
 			.AsNoTracking()
 			.ToListAsync(cancellationToken);
 			});
-		
 
-		
+
+
 		return Result.Success(questions);
 	}
 
@@ -111,7 +111,7 @@ public class Questionservice(ApplicationDbContext context,HybridCache hybridCach
 		await _context.AddAsync(question, cancellationToken);
 		await _context.SaveChangesAsync(cancellationToken);
 
-		await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}",cancellationToken);
+		await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}", cancellationToken);
 		return Result.Success(question.Adapt<QuestionResponse>());
 
 
@@ -135,28 +135,30 @@ public class Questionservice(ApplicationDbContext context,HybridCache hybridCach
 			.SingleOrDefaultAsync(x => x.PollId == pollId && x.Id == id, cancellationToken
 			);
 
-		if(question is  null)
+		if (question is null)
 			return Result.Failure(QuestionErrors.QuestionNotFound);
 
 		question.Content = request.Content;
-		
+
 		//current Answers
-		var currentAnswer=question.Answers.Select(x=>x.Content).ToList();
+		var currentAnswer = question.Answers.Select(x => x.Content).ToList();
 
 		//new Answers that is not in database
-		var newAnswer=request.Answers.Except(currentAnswer).ToList();
+		var newAnswer = request.Answers.Except(currentAnswer).ToList();
 
-		newAnswer.ForEach(answer => {
+		newAnswer.ForEach(answer =>
+		{
 			question.Answers.Add(new Answer { Content = answer });
 		});
 
-		question.Answers.ToList().ForEach(answer => { 
-		question.IsActive=request.Answers.Contains(answer.Content);
+		question.Answers.ToList().ForEach(answer =>
+		{
+			question.IsActive = request.Answers.Contains(answer.Content);
 		});
 
 		await _context.SaveChangesAsync(cancellationToken);
 
-		await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}",cancellationToken);
+		await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}", cancellationToken);
 
 		return Result.Success();
 
@@ -172,7 +174,7 @@ public class Questionservice(ApplicationDbContext context,HybridCache hybridCach
 
 		await _context.SaveChangesAsync(cancellationToken);
 
-		await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}",cancellationToken);
+		await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}", cancellationToken);
 
 		return Result.Success();
 	}

@@ -1,5 +1,4 @@
 ﻿using SurveyBasket.Contracts.Votes;
-using SurveyBasket.Entities;
 
 namespace SurveyBasket.Services;
 
@@ -38,7 +37,7 @@ public class VoteService(ApplicationDbContext context) : IVoteService
 				AnswerId = x.AnswerId
 			}).ToList()
 		};
-		 await _context.AddAsync(vote, cancellationToken);
+		await _context.AddAsync(vote, cancellationToken);
 		await _context.SaveChangesAsync(cancellationToken);
 
 		return Result.Success();
