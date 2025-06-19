@@ -1,4 +1,4 @@
-﻿namespace SurveyBasket.Entities;
+﻿namespace SurveyBasket.Persistence.EntitiesConfiguration;
 
 public class RoleClaimsConfiguration : IEntityTypeConfiguration<IdentityRoleClaim<string>>
 {
