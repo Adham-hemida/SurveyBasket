@@ -9,10 +9,6 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 
 	public async Task<Result<IEnumerable<PollResponse>>> GetAllAsync(CancellationToken cancellationToken = default)
 	{	
-		//var result = await _context.Polls
-		//	.ProjectToType<PollResponse>()
-		//	.AsNoTracking().ToListAsync(cancellationToken);
-
 		var result = await _unitOfWork.Repository<Poll>()
 			.FindAllProjectedAsync<PollResponse>(cancellationToken: cancellationToken);
 
@@ -21,12 +17,6 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 
 	public async Task<Result<IEnumerable<PollResponse>>> GetCurrentAsyncV1(CancellationToken cancellationToken = default)
 	{	
-		//var result = await _context.Polls
-		//	.Where(x => x.IsPublished && x.StartsAt < DateOnly.FromDateTime(DateTime.Now) && x.EndsAt > DateOnly.FromDateTime(DateTime.Now))
-		//	.AsNoTracking()
-		//	.ProjectToType<PollResponse>()
-		//	.ToListAsync(cancellationToken);
-
 		var result = await _unitOfWork.Repository<Poll>().FindAllProjectedAsync<PollResponse>(
 			x => x.IsPublished && x.StartsAt < DateOnly.FromDateTime(DateTime.Now) && x.EndsAt > DateOnly.FromDateTime(DateTime.Now),
 			cancellationToken: cancellationToken);
@@ -37,12 +27,6 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 
 	public async Task<Result<IEnumerable<PollResponseV2>>> GetCurrentAsyncV2(CancellationToken cancellationToken = default)
 	{	
-		//var result = await _context.Polls
-		//	.Where(x => x.IsPublished && x.StartsAt < DateOnly.FromDateTime(DateTime.Now) && x.EndsAt > DateOnly.FromDateTime(DateTime.Now))
-		//	.AsNoTracking()
-		//	.ProjectToType<PollResponseV2>()
-		//	.ToListAsync(cancellationToken);
-
 		var result = await _unitOfWork.Repository<Poll>()
 			.FindAllProjectedAsync<PollResponseV2>(
      x => x.IsPublished && x.StartsAt < DateOnly.FromDateTime(DateTime.Now) && x.EndsAt > DateOnly.FromDateTime(DateTime.Now),
@@ -56,7 +40,6 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 
 	public async Task<Result<PollResponse>> GetAsync(int id, CancellationToken cancellationToken = default)
 	{		
-		//var poll = await _context.Polls.FindAsync(id, cancellationToken);
 
 		var poll = await _unitOfWork.Repository<Poll>()
 			.GetByIdAsync(id, cancellationToken: cancellationToken);
@@ -68,7 +51,6 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 
 	public async Task<Result<PollResponse>> AddAsync(PollRequest request, CancellationToken cancellationToken = default)
 	{
-		//var isExisting = await _context.Polls.AnyAsync(p => p.Title == request.Title, cancellationToken);
 		var isExisting = await _unitOfWork.Repository<Poll>()
 			.AnyAsync(p => p.Title == request.Title, cancellationToken: cancellationToken);
 
@@ -79,22 +61,18 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 
 	   await _unitOfWork.Repository<Poll>().CreateAsync(poll,cancellationToken);
 		await _unitOfWork.CompleteAsync(cancellationToken);
-		//await _context.AddAsync(poll, cancellationToken);
-		//await _context.SaveChangesAsync(cancellationToken);
 
 		return Result.Success(poll.Adapt<PollResponse>());
 	}
 
 	public async Task<Result> UpdateAsync(int id, PollRequest request, CancellationToken cancellationToken = default)
 	{
-		//	var currentPoll = await _context.Polls.FindAsync(id, cancellationToken);
 		var currentPoll = await _unitOfWork.Repository<Poll>()
 				.GetByIdAsync(id, cancellationToken: cancellationToken);
 
 		if (currentPoll is null)
 			return Result.Failure(PollErrors.PollNotFound);
 
-		//var isExisting = await _context.Polls.AnyAsync(p => p.Title == request.Title && p.Id != id, cancellationToken);
 		var isExisting = await _unitOfWork.Repository<Poll>()
 			.AnyAsync(p => p.Title == request.Title && p.Id != id, cancellationToken: cancellationToken);
 	
@@ -103,7 +81,6 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 
 		currentPoll = request.Adapt(currentPoll);
 
-		//await _context.SaveChangesAsync(cancellationToken);
 	    await _unitOfWork.CompleteAsync(cancellationToken);
 
 		return Result.Success();
@@ -113,7 +90,6 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 
 	public async Task<Result> DeleteAsync(int id, CancellationToken cancellationToken = default)
 	{
-		//var poll = await _context.Polls.FindAsync(id, cancellationToken);
 		var poll = await _unitOfWork.Repository<Poll>()
 			.GetByIdAsync(id, cancellationToken: cancellationToken);
 
@@ -123,14 +99,12 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 		//_context.Remove(poll);
 		_unitOfWork.Repository<Poll>().DeleteAsync(poll);
 		
-		//await _context.SaveChangesAsync(cancellationToken);
 		await _unitOfWork.CompleteAsync(cancellationToken);
 		return Result.Success();
 	}
 
 	public async Task<Result> TogglePublishStatusAsync(int id, CancellationToken cancellationToken = default)
 	{
-		//var poll = await _context.Polls.FindAsync(id, cancellationToken);
 		var poll = await _unitOfWork.Repository<Poll>()
 			.GetByIdAsync(id, cancellationToken: cancellationToken);
 
@@ -138,7 +112,6 @@ public class PollService(ApplicationDbContext context, IUnitOfWork unitOfWork) :
 			return Result.Failure(PollErrors.PollNotFound);
 		poll.IsPublished = !poll.IsPublished;
 		
-		//await _context.SaveChangesAsync(cancellationToken);
 		await _unitOfWork.CompleteAsync(cancellationToken);
 		return Result.Success();
 	}
