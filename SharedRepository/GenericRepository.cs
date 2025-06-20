@@ -7,7 +7,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 {
 	private readonly ApplicationDbContext _context;
 	private readonly DbSet<T> _dbSet;
-	public GenericRepository(ApplicationDbContext context, DbSet<T> _dbSet)
+	public GenericRepository(ApplicationDbContext context)
 	{
 		_context = context;
 		_dbSet = _context.Set<T>();

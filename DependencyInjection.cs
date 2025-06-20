@@ -7,10 +7,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Asn1.X509.Qualified;
 using SurveyBasket.Authentication;
 using SurveyBasket.Health;
 using SurveyBasket.OpenApiTransformers;
 using SurveyBasket.Settings;
+using SurveyBasket.SharedRepository;
+using SurveyBasket.UnitOfWorks;
 using System.Text;
 using System.Threading.RateLimiting;
 
@@ -54,6 +57,8 @@ public static class DependencyInjection
 		services.AddScoped<IQuestionService, Questionservice>();
 		services.AddScoped<IVoteService, VoteService>();
 		services.AddScoped<IResultService, ResultService>();
+		services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+		services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 		services.AddExceptionHandler<GlobalExceptionHandler>();
 		services.AddProblemDetails();
