@@ -15,4 +15,5 @@ public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRe
 			.WithMessage("New password should not be same as current password");
 	}
 
+
 }
