@@ -177,7 +177,7 @@ public class AuthService(
 		if (await _userManager.FindByEmailAsync(request.Email) is not { } user)
 			return Result.Success();
 
-		if (!user.EmailConfirmed)
+		if (user.EmailConfirmed)
 			return Result.Failure(UserErrors.DuplicatedConfirmation);
 
 		var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
